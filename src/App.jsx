@@ -1,21 +1,24 @@
-import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import Hero from './components/Hero';
-import SalaSecreta from './components/SalaSecreta';
-import Mentoria from './components/Mentoria';
-import Imersao from './components/Imersao';
 import Footer from './components/Footer';
-import './index.css';
+import Home from './components/Home';
+import Login from './components/Login';
+import VipArea from './components/AreaVip';
+import Missao from './components/Missao';  // ✅ Import da página Missão
 
-const App = () => (
-  <div>
-    <Header />
-    <Hero />
-    <SalaSecreta />
-    <Mentoria />
-    <Imersao />
-    <Footer />
-  </div>
-);
+function App() {
+  return (
+    <Router>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/area-vip" element={<VipArea />} />
+        <Route path="/missao" element={<Missao />} />  {/* ✅ Rota da Missão */}
+      </Routes>
+      <Footer />
+    </Router>
+  );
+}
 
 export default App;

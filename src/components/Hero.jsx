@@ -2,13 +2,37 @@ import React, { useState } from 'react';
 
 const Hero = () => {
   const [formData, setFormData] = useState({ name: '', email: '', whatsapp: '' });
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = () => {
-    alert(`Inscrição recebida! Nome: ${formData.name}, Email: ${formData.email}, WhatsApp: ${formData.whatsapp}`);
+  const handleSubmit = async () => {
+    if (!formData.name || !formData.email || !formData.whatsapp) {
+      alert('Por favor, preencha todos os campos.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:5000/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert('Inscrição enviada com sucesso!');
+        setFormData({ name: '', email: '', whatsapp: '' });
+      } else {
+        alert('Erro ao enviar inscrição.');
+      }
+    } catch (error) {
+      alert('Erro de conexão com o servidor.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,9 +71,12 @@ const Hero = () => {
           />
           <button
             onClick={handleSubmit}
-            className="bg-purple-600 text-white py-3 px-6 rounded-md hover:bg-purple-700"
+            disabled={loading}
+            className={`py-3 px-6 rounded-md text-white ${
+              loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
+            }`}
           >
-            Garantir Minha Vaga
+            {loading ? 'Enviando...' : 'Garantir Minha Vaga'}
           </button>
         </div>
       </div>
