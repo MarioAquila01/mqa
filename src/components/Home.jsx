@@ -13,7 +13,7 @@ const Home = () => {
       >
         <div className="p-8 max-w-2xl">
           <img
-            src="/assets/img/logo-mqa-sem-raio.png"
+            src="/assets/img/logo-mqa-sem-raio.jpeg"
             alt="Logo Melhor que Antes"
             className="mx-auto mb-6 w-40"
           />
