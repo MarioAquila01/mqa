@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 import { scroller } from 'react-scroll';
 
 import Missao from './Missao';
+import Livro from './Livro';
 import SalaSecreta from './SalaSecreta';
 import Palestras from './Palestras';
-import Livro from './Livro';
 import Podcast from './Podcast';
 import Contato from './Contato';
 
@@ -58,9 +58,9 @@ const Home = () => {
       </div>
 
       <div id="missao"><Missao /></div>
+      <div id="livro"><Livro /></div>
       <div id="sala-secreta"><SalaSecreta /></div>
       <div id="palestras"><Palestras /></div>
-      <div id="livro"><Livro /></div>
       <div id="podcast"><Podcast /></div>
       <div id="contato"><Contato /></div>
     </>
