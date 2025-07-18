@@ -53,7 +53,7 @@ const Podcast = () => (
           variants={fadeUp}
           custom={0.2}
         >
-          Toda semana com Thaís Rosa: histórias reais, reflexões profundas e inspiração para mulheres que estão recomeçando.
+          Histórias reais, reflexões profundas e inspiração para quem está recomeçando.
           Transforme sua dor em força e siga em frente com o MQA.
         </motion.p>
 

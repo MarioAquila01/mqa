@@ -5,7 +5,7 @@ const Missao = () => {
     <section className="flex flex-col md:flex-row items-center justify-center bg-gradient-to-r from-[#1e1e28] to-[#2e2e3e] text-white py-20 px-6 md:px-16" id="missao">
       <div className="w-full md:w-1/2 mb-10 md:mb-0 md:mr-8">
         <img
-          src="/assets/img/missao-image.png"
+          src="/assets/img/missao-image.jpeg"
           alt="Imagem Missão"
           className="w-full rounded-2xl shadow-[0_0_25px_rgba(128,90,213,0.3)] object-cover"
         />

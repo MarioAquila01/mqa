@@ -5,7 +5,6 @@ import Missao from './components/Missao';
 import SalaSecreta from './components/SalaSecreta';
 import Livro from './components/Livro';
 import Podcast from './components/Podcast';
-import Palestras from './components/Palestras';
 import Contato from './components/Contato';
 import Login from './components/Login';
 import AreaVip from './components/AreaVip';
@@ -30,7 +29,6 @@ const App = () => {
         <Route path="/sala-secreta" element={<SalaSecreta />} />
         <Route path="/livro" element={<Livro />} />
         <Route path="/podcast" element={<Podcast />} />
-        <Route path="/palestras" element={<Palestras />} />
         <Route path="/contato" element={<Contato />} />
         <Route path="/login" element={<Login />} />
         <Route path="/vip" element={<AreaVip />} />

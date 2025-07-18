@@ -37,7 +37,6 @@ const Header = () => {
           <button onClick={() => goToSection('missao')} className="hover:text-purple-300">Missão</button>
           <button onClick={() => goToSection('sala-secreta')} className="hover:text-purple-300">Sala Secreta</button>
           <button onClick={() => goToSection('livro')} className="hover:text-purple-300">Livro</button>
-          <button onClick={() => goToSection('palestras')} className="hover:text-purple-300">Palestras</button>
           <button onClick={() => goToSection('podcast')} className="hover:text-purple-300">Podcast</button>
           <button onClick={() => goToSection('contato')} className="hover:text-purple-300">Contato</button>
           <RouterLink to="/login" className="hover:text-purple-300">Login</RouterLink>

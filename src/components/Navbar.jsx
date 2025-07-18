@@ -3,17 +3,27 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   return (
-    <nav className="bg-black text-white p-4 flex justify-between">
-      <div className="font-bold text-xl">MQA</div>
-      <div className="space-x-4">
-        <Link to="/">Home</Link>
-        <Link to="/missao">Missão</Link>
-        <Link to="/sala-secreta">Sala Secreta</Link>
-        <Link to="/livro">Livro</Link>
-        <Link to="/podcast">Podcast</Link>
-        <Link to="/palestras">Palestras</Link>
-        <Link to="/contato">Contato</Link>
-        <Link to="/login">Login</Link>
+    <nav className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 shadow-md">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+        
+        {/* Logo à esquerda */}
+        <Link to="/">
+          <img
+            src="/assets/img/logo-mqa-sem-raio.png"
+            alt="Logo MQA"
+            className="h-10 w-auto object-contain"
+          />
+        </Link>
+
+        {/* Menu à direita */}
+        <div className="space-x-4 text-white font-medium text-sm md:text-base">
+          <Link to="/" className="hover:text-gray-200 transition">Home</Link>
+          <Link to="/missao" className="hover:text-gray-200 transition">Missão</Link>
+          <Link to="/livro" className="hover:text-gray-200 transition">Livro</Link>
+          <Link to="/podcast" className="hover:text-gray-200 transition">Podcast</Link>
+          <Link to="/contato" className="hover:text-gray-200 transition">Contato</Link>
+          <Link to="/login" className="hover:text-gray-200 transition">Login</Link>
+        </div>
       </div>
     </nav>
   );
