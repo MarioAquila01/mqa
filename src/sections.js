@@ -1,13 +1,13 @@
-import Missao from '../components/Missao';
-import Livro from '../components/Livro';
-import SalaSecreta from '../components/SalaSecreta';
-import Podcast from '../components/Podcast';
-import Contato from '../components/Contato';
+import Missao from '@/components/Missao.jsx';
+import Livro from '@/components/Livro.jsx';
+import SalaSecreta from '@/components/SalaSecreta.jsx';
+import Podcast from '@/components/Podcast.jsx';
+import Contato from '@/components/Contato.jsx';
 
 export const pageSections = [
   { name: 'missao', component: Missao },
   { name: 'livro', component: Livro },
-  { name: 'salasecreta', component: SalaSecreta, aliases: ['sala-secreta'] },
+  { name: 'sala-secreta', component: SalaSecreta, aliases: ['salasecreta'] },
   { name: 'podcast', component: Podcast },
   { name: 'contato', component: Contato },
 ];
