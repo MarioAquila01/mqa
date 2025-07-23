@@ -20,7 +20,7 @@ const App = () => {
     <Router>
       <Navbar />
       <Routes>
-        {/* Rotas para a Home e seções com scrollTo */}
+        {/* Rota principal e seções da página */}
         {['/', ...pageSections.map(s => `/${s.name}`)].map(path => {
           const sectionName = path === '/' ? null : path.slice(1);
           return (
@@ -32,7 +32,7 @@ const App = () => {
           );
         })}
 
-        {/* Redirecionamentos com aliases */}
+        {/* Redirecionamentos de aliases (ex: /salasecreta → /sala-secreta) */}
         {pageSections.flatMap(section =>
           (section.aliases || []).map(alias => (
             <Route
@@ -43,7 +43,7 @@ const App = () => {
           ))
         )}
 
-        {/* Outras páginas */}
+        {/* Outras páginas fixas */}
         <Route path="/login" element={<Login />} />
         <Route path="/vip" element={<AreaVip />} />
 
