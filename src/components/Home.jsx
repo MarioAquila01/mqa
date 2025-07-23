@@ -1,43 +1,40 @@
 import React, { useEffect } from 'react';
-import { scroller, Element, Link } from 'react-scroll';
+import { scroller, Element } from 'react-scroll';
 import { pageSections } from '@/sections';
 
-const Home = () => {
+const Home = ({ scrollTo }) => {
   useEffect(() => {
     const scrollToSection = (section) => {
       setTimeout(() => {
         scroller.scrollTo(section, {
           duration: 600,
           smooth: true,
-          offset: -80, // Ajuste conforme a altura do seu header fixo
+          offset: -80 // ajuste conforme altura da Navbar fixa
         });
-      }, 300); // Delay para garantir que os componentes da seção foram montados
+      }, 300); // delay para garantir montagem dos componentes
     };
 
-    // Prioridade 1: Checar sessionStorage (para navegação entre "páginas")
-    const sessionTarget = sessionStorage.getItem('scrollTarget');
-    if (sessionTarget) {
-      scrollToSection(sessionTarget);
-      sessionStorage.removeItem('scrollTarget');
-    } else {
-      // Prioridade 2: Checar o path da URL (para links diretos como /missao)
-      const pathTarget = window.location.pathname.slice(1); // Remove a barra inicial "/"
-      // Gera a lista de seções válidas dinamicamente
-      const validSections = pageSections.map(s => s.name);
+    const validSections = pageSections.map(s => s.name);
 
-      if (validSections.includes(pathTarget)) {
-        scrollToSection(pathTarget);
+    // 1º: scrollTo vindo da rota (via prop App.jsx)
+    if (scrollTo && validSections.includes(scrollTo)) {
+      scrollToSection(scrollTo);
+    } else {
+      // 2º: check sessionStorage (navegação por botão)
+      const sessionTarget = sessionStorage.getItem('scrollTarget');
+      if (sessionTarget && validSections.includes(sessionTarget)) {
+        scrollToSection(sessionTarget);
+        sessionStorage.removeItem('scrollTarget');
       } else {
-        // Se não houver alvo, rola para o topo
+        // 3º: fallback – rola para o topo
         window.scrollTo(0, 0);
       }
     }
-  }, []);
+  }, [scrollTo]);
 
   return (
     <>
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-[#1e1e28] to-[#2e2e3e] text-white px-6 py-20 text-center">
-        
         <img
           src="/assets/img/mar-background.webp"
           alt="Thaís Rosa sorrindo - Mentoria Melhor Que Antes"
@@ -49,8 +46,6 @@ const Home = () => {
           “A separação que parecia ser meu fim revelou-se o início de algo melhor que antes.”
         </p>
         <span className="font-semibold text-white text-lg mb-6">Thaís Rosa</span>
-
-      
       </div>
 
       {/* Seções da Página */}

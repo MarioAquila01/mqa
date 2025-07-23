@@ -20,12 +20,19 @@ const App = () => {
     <Router>
       <Navbar />
       <Routes>
-        {/* Rotas para a Home e todas as seções principais. Todas renderizam o componente Home. */}
-        {['/', ...pageSections.map(s => `/${s.name}`)].map(path => (
-          <Route key={path} path={path} element={<Home />} />
-        ))}
+        {/* Rotas para a Home e seções com scrollTo */}
+        {['/', ...pageSections.map(s => `/${s.name}`)].map(path => {
+          const sectionName = path === '/' ? null : path.slice(1);
+          return (
+            <Route
+              key={path}
+              path={path}
+              element={<Home scrollTo={sectionName} />}
+            />
+          );
+        })}
 
-        {/* Gera redirecionamentos dinamicamente a partir dos aliases definidos em sections.js */}
+        {/* Redirecionamentos com aliases */}
         {pageSections.flatMap(section =>
           (section.aliases || []).map(alias => (
             <Route
@@ -35,10 +42,12 @@ const App = () => {
             />
           ))
         )}
+
+        {/* Outras páginas */}
         <Route path="/login" element={<Login />} />
         <Route path="/vip" element={<AreaVip />} />
 
-        {/* Rota "Catch-all" para páginas não encontradas */}
+        {/* Página 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
