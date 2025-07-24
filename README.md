@@ -1,12 +1,46 @@
-# React + Vite
+# 🌸 MQA com Thaís Rosa
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Bem-vindo ao repositório oficial do projeto **Melhor Que Antes** – um site moderno, leve e responsivo desenvolvido com **React + Vite + TailwindCSS**.
 
-Currently, two official plugins are available:
+Este projeto visa apoiar o processo de reconstrução emocional e desenvolvimento pessoal, com foco em mentorias, imersões e conteúdos exclusivos para mulheres e homens em transformação.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🚀 Tecnologias Utilizadas
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **React 19**
+- **Vite**
+- **TailwindCSS**
+- **Framer Motion**
+- **React Router DOM**
+- **Axios**
+- **Render (Deploy e API)**
+
+---
+
+## ⚙️ Scripts Disponíveis
+
+### `npm run dev`
+Inicia o ambiente de desenvolvimento local em `http://localhost:5173`.
+
+### `npm run build`
+Compila o projeto para produção, gerando a pasta `dist/`.
+
+### `npm run preview`
+Serve localmente o conteúdo já compilado (`dist/`).
+
+### `npm start`
+Usa o pacote `serve` para subir a pasta `dist/` (usado em produção estática).
+
+---
+
+## 🌐 Deploy Automático
+
+Este projeto está conectado à plataforma **Render** com **webhook de implantação automática**.
+
+> A cada `git push` no repositório, um novo deploy é disparado automaticamente na Render.
+
+---
+
+## 📦 Estrutura do Projeto
+
