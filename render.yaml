@@ -1,10 +1,6 @@
 services:
   - type: web
     name: mqa-site
-    env: static
-    buildCommand: echo "🏗️ Estou dentro do render.yaml" && npm run build
-    staticPublishPath: dist
-    routes:
-      - type: rewrite
-        source: /teste-forcado
-        destination: /index.html
+    env: node
+    buildCommand: npm run build
+    startCommand: npm start
