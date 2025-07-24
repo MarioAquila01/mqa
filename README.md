@@ -1,46 +1,44 @@
-# 🌸 MQA com Thaís Rosa
+# 🌟 MQA - Melhor Que Antes
 
-Bem-vindo ao repositório oficial do projeto **Melhor Que Antes** – um site moderno, leve e responsivo desenvolvido com **React + Vite + TailwindCSS**.
-
-Este projeto visa apoiar o processo de reconstrução emocional e desenvolvimento pessoal, com foco em mentorias, imersões e conteúdos exclusivos para mulheres e homens em transformação.
+Site oficial da plataforma **MQA com Thaís Rosa**, desenvolvido com **React + Vite**, estilizado com **TailwindCSS** e otimizado para produção com **Docker + Nginx**.
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## 📌 Sobre o projeto
 
-- **React 19**
-- **Vite**
-- **TailwindCSS**
-- **Framer Motion**
-- **React Router DOM**
-- **Axios**
-- **Render (Deploy e API)**
+Este projeto visa apresentar conteúdos exclusivos da mentoria "Melhor Que Antes", com seções como:
 
----
-
-## ⚙️ Scripts Disponíveis
-
-### `npm run dev`
-Inicia o ambiente de desenvolvimento local em `http://localhost:5173`.
-
-### `npm run build`
-Compila o projeto para produção, gerando a pasta `dist/`.
-
-### `npm run preview`
-Serve localmente o conteúdo já compilado (`dist/`).
-
-### `npm start`
-Usa o pacote `serve` para subir a pasta `dist/` (usado em produção estática).
+- 📘 E-books gratuitos
+- 🎤 Sala Secreta com conteúdos exclusivos
+- 🎯 Missão MQA
+- 📞 Contato direto com a equipe
 
 ---
 
-## 🌐 Deploy Automático
+## 🧱 Tecnologias utilizadas
 
-Este projeto está conectado à plataforma **Render** com **webhook de implantação automática**.
-
-> A cada `git push` no repositório, um novo deploy é disparado automaticamente na Render.
+- [React](https://reactjs.org/)
+- [Vite](https://vitejs.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Docker](https://www.docker.com/)
+- [Nginx](https://www.nginx.com/)
+- Hospedagem via [Render](https://render.com/)
 
 ---
 
-## 📦 Estrutura do Projeto
+## 📦 Instalação local (sem Docker)
 
+```bash
+# 1. Clone o repositório
+git clone https://github.com/MarioAquila01/mqa.git
+
+# 2. Acesse o diretório
+cd mqa
+
+# 3. Instale as dependências
+npm install
+
+# 4. Rode o projeto localmente
+npm run dev
+
+# Acesse em: http://localhost:5173

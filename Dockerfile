@@ -1,5 +1,4 @@
-# Dockerfile
-# Build Stage
+# Estágio de construção
 FROM node:18-alpine AS build
 
 WORKDIR /app
@@ -10,12 +9,12 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Production Stage
+# Estágio de produção
 FROM nginx:stable-alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copia o arquivo default.conf (opcional para configuração customizada)
+# Copiar um arquivo default.conf se necessário (descomente e configure se precisar)
 # COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
