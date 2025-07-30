@@ -1,4 +1,4 @@
-# Estágio de build
+# Etapa de build
 FROM node:18-alpine AS build
 WORKDIR /app
 COPY package*.json ./
@@ -6,10 +6,10 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Estágio de produção
+# Etapa de produção (container final leve com serve)
 FROM node:18-alpine
-RUN npm install -g serve
 WORKDIR /app
+RUN npm install serve
 COPY --from=build /app/dist .
 EXPOSE 3000
-CMD ["serve", "-s", ".", "-l", "3000", "--single"]
+CMD ["npx", "serve", "-s", ".", "-l", "3000", "--single"]
