@@ -86,26 +86,30 @@ const LivesMentorias = () => {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+  setError(null);
 
-    if (!formData.name || !formData.email || !formData.selectedOption) {
-      setError('Preencha todos os campos obrigatórios.');
-      setIsSubmitting(false);
-      return;
-    }
+  if (!formData.name || !formData.email || !formData.selectedOption) {
+    setError('Preencha todos os campos obrigatórios.');
+    setIsSubmitting(false);
+    return;
+  }
 
-    try {
-      await axios.post(`${API_URL}/api/send/mentoria`, formData);
-      alert('Formulário enviado com sucesso!');
-    } catch (err) {
-      setError('Erro ao enviar. Tente novamente.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  console.log('🚀 Enviando dados para a API:', formData);
+
+  try {
+    const response = await sendMentoria(formData);
+    console.log('✅ Resposta da API Mentoria:', response);
+    alert('Inscrição enviada com sucesso!');
+  } catch (err) {
+    console.error('❌ Erro ao enviar Mentoria:', err);
+    setError('Erro ao enviar. Tente novamente.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <section className="py-20 bg-gradient-to-r from-[#1e1e28] to-[#2e2e3e] text-white">
