@@ -2,7 +2,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCalendarCheck } from 'react-icons/fa';
-import axios from 'axios';
+import axios from 'axios';  
+import { sendMentoria } from '../services/api';  // ✅ IMPORTAR FUNÇÃO DA API
+
 
 const API_URL = import.meta.env.VITE_API_URL;
 
