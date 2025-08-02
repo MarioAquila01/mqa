@@ -66,19 +66,6 @@ const Livro = () => {
         </a>
       </div>
 
-      {/* VÍDEO EXPLICANDO O PROPÓSITO */}
-      <div className="mt-24 max-w-5xl mx-auto">
-        <div className="aspect-w-16 aspect-h-9 rounded-xl overflow-hidden shadow-lg border border-purple-500/20">
-          <iframe
-            src="https://www.youtube.com/embed/uhWFqzYEREI"
-            title="Propósito do Livro"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-64 md:h-[400px]"
-          ></iframe>
-        </div>
-      </div>
     </section>
   );
 };

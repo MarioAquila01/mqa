@@ -15,13 +15,14 @@ const Login = () => {
     }
 
     try {
-      const response = await api.post('/api/login-unico', { email, password });
+      const response = await api.post('/auth/admin-login', { email, password });
       const { token, role } = response.data;
 
       if (token) {
         localStorage.setItem('userToken', token);
-        localStorage.setItem('userRole', role);
-        navigate(role === 'admin' ? '/area-vip' : '/vip');
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userRole', role || 'admin');
+        navigate('/AreaVip');
       } else {
         setError('Login falhou.');
       }

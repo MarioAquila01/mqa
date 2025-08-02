@@ -1,8 +1,7 @@
 // src/services/api.js
 import axios from 'axios';
 
-// ✅ URL atualizada para a API hospedada no Render
-const API_BASE_URL = 'https://api-mqa.onrender.com';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -11,12 +10,15 @@ const api = axios.create({
   },
 });
 
-// Enviar dados da Sala Secreta
+// ✅ Funções de envio
+export const sendEbook = async (data) => {
+  return api.post('/ebook', data);
+};
+
 export const sendSalaSecreta = async (data) => {
   return api.post('/send/sala-secreta', data);
 };
 
-// Enviar dados do formulário de contato
 export const sendContato = async (data) => {
   return api.post('/send/contato', data);
 };

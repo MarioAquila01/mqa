@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaGift } from 'react-icons/fa';
-import api from '../services/api';
+import { sendEbook } from '../services/api'; // ✅ função correta
 
-const SalaSecreta = () => {
+const Ebook = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -46,7 +46,7 @@ const SalaSecreta = () => {
     }
 
     try {
-      await api.post('/send/sala-secreta', formData);
+      await sendEbook(formData); // ✅ chamada correta
       alert('✅ Inscrição realizada com sucesso! Verifique seu e-mail.');
       setFormData({
         name: '',
@@ -68,9 +68,8 @@ const SalaSecreta = () => {
   return (
     <section className="py-20 bg-gradient-to-r from-[#1e1e28] to-[#2e2e3e] text-white">
       <div className="max-w-2xl mx-auto text-center px-4">
-        <h2 className="text-4xl font-bold mb-4"> E-book Renascimento em 7 Dias</h2>
+        <h2 className="text-4xl font-bold mb-4">E-book Renascimento em 7 Dias</h2>
 
-        {/* Capas dos e-books */}
         <div className="flex justify-center gap-4 flex-wrap mb-6">
           <img
             src="/assets/img/e-book-mulher.png"
@@ -84,7 +83,6 @@ const SalaSecreta = () => {
           />
         </div>
 
-        {/* Texto + destaque animado */}
         <p className="text-lg mb-2">
           Adquira seu e-book gratuito fazendo o cadastro abaixo e receba diretamente no seu e-mail 📩
         </p>
@@ -101,32 +99,33 @@ const SalaSecreta = () => {
           </p>
         </motion.div>
 
-        {/* Formulário */}
         <form
           onSubmit={handleSubmit}
           className="space-y-4 text-white text-left bg-[#151515]/80 border border-purple-500/20 rounded-3xl shadow-xl p-6"
         >
           <input
-            type="text"
             name="name"
+            type="text"
             placeholder="Nome"
             value={formData.name}
             onChange={handleInputChange}
             className="w-full p-3 rounded-md border border-purple-500/30 bg-black/30"
             required
           />
+
           <input
-            type="email"
             name="email"
+            type="email"
             placeholder="E-mail"
             value={formData.email}
             onChange={handleInputChange}
             className="w-full p-3 rounded-md border border-purple-500/30 bg-black/30"
             required
           />
+
           <input
-            type="text"
             name="whatsapp"
+            type="text"
             placeholder="WhatsApp"
             value={formData.whatsapp}
             onChange={handleInputChange}
@@ -150,16 +149,16 @@ const SalaSecreta = () => {
           {formData.ebookOption === 'ambos' && (
             <>
               <input
-                type="text"
                 name="indicadoNome"
+                type="text"
                 placeholder="Nome da pessoa indicada"
                 value={formData.indicadoNome}
                 onChange={handleInputChange}
                 className="w-full p-3 rounded-md border border-purple-500/30 bg-black/30"
               />
               <input
-                type="tel"
                 name="indicadoWhatsapp"
+                type="tel"
                 placeholder="WhatsApp da pessoa indicada"
                 value={formData.indicadoWhatsapp}
                 onChange={handleInputChange}
@@ -168,7 +167,6 @@ const SalaSecreta = () => {
             </>
           )}
 
-          {/* Termos */}
           <div className="text-sm text-gray-300 space-y-2">
             <label className="flex items-center space-x-2">
               <input
@@ -196,8 +194,22 @@ const SalaSecreta = () => {
           {error && <p className="text-red-400 mt-4">{error}</p>}
         </form>
       </div>
+            {/* VÍDEO EXPLICANDO O PROPÓSITO */}
+      <div className="mt-24 max-w-5xl mx-auto">
+        <div className="aspect-w-16 aspect-h-9 rounded-xl overflow-hidden shadow-lg border border-purple-500/20">
+          <iframe
+            src="https://www.youtube.com/embed/uhWFqzYEREI"
+            title="Propósito do Livro"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="w-full h-64 md:h-[400px]"
+          ></iframe>
+        </div>
+      </div>
+
     </section>
   );
 };
 
-export default SalaSecreta;
+export default Ebook;
