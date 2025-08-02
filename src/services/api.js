@@ -1,7 +1,8 @@
-// src/services/api.js (Atualizado)
+// src/services/api.js (URL fixa configurada)
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+// 🔒 URL fixa da API Render
+const API_BASE_URL = 'https://api-mqa.onrender.com';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
