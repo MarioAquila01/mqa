@@ -1,5 +1,4 @@
-// Lives & Mentorias Page (FINAL)
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCalendarCheck } from 'react-icons/fa';
 import { sendMentoria } from '../services/api';
@@ -9,9 +8,9 @@ const options = [
     label: 'Live Gratuita',
     value: 'live',
     image: '/assets/img/1.png',
-    glow: 'shadow-[0_0_60px_rgba(34,197,94,0.5)]',
+    glowColor: 'bg-green-500/20',
     ctaText: '👉 Quero participar da Live Gratuita',
-    hotmartLink: 'https://pay.hotmart.com/N101188112B',
+    hotmartLink: '',
     description: `Talvez ninguém veja, mas por dentro você sente que algo se perdeu. O que antes te definia agora parece distante, confusa ou quebrada.
 
 O que você vai viver nessa live:
@@ -25,42 +24,37 @@ Valor: Gratuito`
     label: 'Sala Secreta',
     value: 'sala',
     image: '/assets/img/2.png',
-    glow: 'shadow-[0_0_60px_rgba(59,130,246,0.5)]',
+    glowColor: 'bg-blue-500/20',
     ctaText: '🔒 Quero minha vaga na Sala Secreta',
-    hotmartLink: 'https://pay.hotmart.com/SALA-SECRETA-LINK',
-    description: `Você merece um espaço seguro para começar de novo. A Sala Secreta MQA é um encontro ao vivo, íntimo e transformador, feito pra você que está carregando dores silenciosas desde o fim do seu relacionamento.
-
+    hotmartLink: 'https://pay.hotmart.com/N101188112B?bid=1754341340575',
+    description: `Você merece um espaço seguro para começar de novo.
+A Sala Secreta MQA é um encontro ao vivo, íntimo e transformador, feito pra você que está carregando dores silenciosas desde o fim do seu relacionamento.
 Talvez você esteja tentando ser forte por fora, mas por dentro ainda está perdida, cansada, presa ao que passou — ou ao que nunca foi.
-
 Esse espaço é pra você olhar com mais compaixão pra sua história e com mais clareza pro seu futuro.
-
+________________________________________
 O que vai acontecer na Sala Secreta:
 • Você vai entender por que ainda dói tanto, mesmo depois de meses ou anos.
 • Vai descobrir que existe um caminho possível de reconstrução, com base nas fases do luto e da identidade pós-divórcio.
 • Vai sentir que alguém finalmente te entende, porque aqui ninguém vai te dizer “segue em frente” sem antes te ensinar a juntar os pedaços.
-
-Duração: 2h, ao vivo com Thaís Rosa, em grupo fechado, com espaço pra escuta, acolhimento e partilha.
-
+________________________________________
+Duração:
+2h, ao vivo com Thaís Rosa, em grupo fechado, com espaço pra escuta, acolhimento e partilha.
+________________________________________
 🔒 Vagas limitadas. É um encontro íntimo. Real. Profundo.
 Esse não é um evento somente para assistir, é pra sentir, refletir e sair diferente de como entrou.
-
+________________________________________
 Valor simbólico de entrada: R$47,60
-Você não está pagando por um conteúdo. Está investindo na primeira virada de chave da sua nova vida.`
+Você não está pagando por um conteúdo.
+Está investindo na primeira virada de chave da sua nova vida.`
   },
   {
     label: 'Mentoria em Grupo',
     value: 'grupo',
     image: '/assets/img/3.png',
-    glow: 'shadow-[0_0_60px_rgba(250,204,21,0.5)]',
+    glowColor: 'bg-yellow-500/20',
     ctaText: '✍️ Quero descobrir meu arquétipo',
     hotmartLink: 'https://pay.hotmart.com/GRUPO-LINK',
     description: `Mentoria em Grupo MQA: "Os Arquétipos do Divórcio"
-Descubra como sua dor se manifesta e qual o caminho ideal de reconstrução.
-
-O que você vai aprender:
-• Identificar seu arquétipo dominante.
-• Entender padrões e crenças.
-• Plano de reconstrução emocional.
 Formato: 4 encontros online semanais.
 Valor: R$ 297,80 ou 3x de R$ 99,80`
   },
@@ -68,24 +62,22 @@ Valor: R$ 297,80 ou 3x de R$ 99,80`
     label: 'Mentoria Individual',
     value: 'individual',
     image: '/assets/img/4.png',
-    glow: 'shadow-[0_0_60px_rgba(239,68,68,0.5)]',
+    glowColor: 'bg-red-500/20',
     ctaText: '🗝️ Quero um plano só meu',
     hotmartLink: 'https://pay.hotmart.com/INDIVIDUAL-LINK',
     description: `Mentoria 1:1 com Thaís Rosa – Uma jornada de reconstrução feita só para você.
-
-O que acontece:
-• Escuta sem julgamentos.
-• Diagnóstico emocional personalizado.
-• Plano de reconstrução de rotina, autoestima e vida.
 Formato: 4 encontros online + suporte via WhatsApp.
 Valor: R$ 2.997,80 ou 3x de R$ 999,80`
-  }
+  },
 ];
 
 const LivesMentorias = () => {
   const [formData, setFormData] = useState({ name: '', email: '', whatsapp: '', selectedOption: '' });
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
+
+  const handleCardClick = (opt) => setSelectedCard(opt);
 
   const handleCTAClick = (value) => {
     setFormData((prev) => ({ ...prev, selectedOption: value }));
@@ -97,16 +89,22 @@ const LivesMentorias = () => {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!formData.name || !formData.email || !formData.selectedOption) {
       setError('Preencha todos os campos obrigatórios.');
       return;
     }
 
+    setError(null);
+    await sendMentoria(formData);
+
     const selectedOpt = options.find(opt => opt.value === formData.selectedOption);
-    if (selectedOpt) {
+
+    if (selectedOpt.value === 'live') {
+      setSuccess('✅ Inscrição para a Live Gratuita enviada com sucesso! Verifique seu e-mail.');
+      setTimeout(() => setSuccess(null), 5000);
+    } else if (selectedOpt.hotmartLink) {
       window.location.href = selectedOpt.hotmartLink;
     }
   };
@@ -125,13 +123,11 @@ const LivesMentorias = () => {
           {options.map((opt, i) => (
             <div
               key={i}
-              className={`relative rounded-2xl ${opt.glow} transition shadow-xl flex flex-col items-center justify-end h-[28rem] overflow-hidden cursor-pointer`}
-              onClick={() => setSelectedCard(opt)}
+              className={`relative rounded-2xl overflow-hidden shadow-xl cursor-pointer h-[28rem] flex items-end justify-center transition group`}
+              onClick={() => handleCardClick(opt)}
             >
-              <img src={opt.image} alt={opt.label} className="absolute top-0 left-0 w-full h-full object-cover z-0" />
-              <button className="relative z-10 mb-6 px-4 py-2 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-md text-white font-semibold hover:brightness-110">
-                {opt.ctaText}
-              </button>
+              <div className={`absolute inset-0 ${opt.glowColor} blur-2xl z-0`}></div>
+              <img src={opt.image} alt={opt.label} className="absolute top-0 left-0 w-full h-full object-cover z-10 group-hover:scale-105 transition" />
             </div>
           ))}
         </div>
@@ -143,9 +139,7 @@ const LivesMentorias = () => {
           className="bg-black/40 border border-purple-500/30 text-purple-300 text-base md:text-lg font-semibold p-4 rounded-xl flex items-center gap-3 shadow-md mb-8 text-left"
         >
           <FaCalendarCheck className="text-pink-400 text-2xl" />
-          <p className="leading-snug">
-            Escolha abaixo o tipo de encontro e receba o link após o pagamento.
-          </p>
+          <p>Escolha abaixo o tipo de encontro e receba o link após o pagamento.</p>
         </motion.div>
 
         <form id="mentoria-form" onSubmit={handleSubmit} className="space-y-4 text-white text-left bg-[#151515]/80 border border-purple-500/20 rounded-3xl shadow-[0_0_35px_rgba(128,90,213,0.5)] p-6 max-w-md mx-auto">
@@ -160,6 +154,7 @@ const LivesMentorias = () => {
             Ir para Pagamento
           </button>
           {error && <p className="text-red-400 mt-4">{error}</p>}
+          {success && <p className="text-green-400 mt-4">{success}</p>}
         </form>
       </div>
 
