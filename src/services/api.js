@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // 🔒 URL fixa da API Render
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = 'https://api-mqa.onrender.com';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
