@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCalendarCheck } from 'react-icons/fa';
 import { sendMentoria } from '../services/api';
 
+// Define options array with details for each mentorship/live option
 const options = [
   {
     label: 'Live Gratuita',
@@ -10,7 +11,7 @@ const options = [
     image: '/assets/img/1.png',
     glowColor: 'bg-green-500/20',
     ctaText: '👉 Quero participar da Live Gratuita',
-    hotmartLink: '',
+    hotmartLink: '', // No payment link for free live
     description: `Talvez ninguém veja, mas por dentro você sente que algo se perdeu. O que antes te definia agora parece distante, confusa ou quebrada.
 
 O que você vai viver nessa live:
@@ -26,7 +27,7 @@ Valor: Gratuito`
     image: '/assets/img/2.png',
     glowColor: 'bg-blue-500/20',
     ctaText: '🔒 Quero minha vaga na Sala Secreta',
-    hotmartLink: 'https://pay.hotmart.com/N101188112B?bid=1754341340575',
+    hotmartLink: 'https://pay.hotmart.com/N101188112B', // Corrected Hotmart link
     description: `Você merece um espaço seguro para começar de novo.
 A Sala Secreta MQA é um encontro ao vivo, íntimo e transformador, feito pra você que está carregando dores silenciosas desde o fim do seu relacionamento.
 Talvez você esteja tentando ser forte por fora, mas por dentro ainda está perdida, cansada, presa ao que passou — ou ao que nunca foi.
@@ -72,53 +73,82 @@ Valor: R$ 2.997,80 ou 3x de R$ 999,80`
 ];
 
 const LivesMentorias = () => {
+  // State to manage form inputs (name, email, whatsapp, selectedOption)
   const [formData, setFormData] = useState({ name: '', email: '', whatsapp: '', selectedOption: '' });
+  // State to manage error messages
   const [error, setError] = useState(null);
+  // State to manage success messages
   const [success, setSuccess] = useState(null);
+  // State to manage selected card for modal display
   const [selectedCard, setSelectedCard] = useState(null);
+  // State to manage loading state during form submission
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Handle card click to show modal with option details
   const handleCardClick = (opt) => setSelectedCard(opt);
 
+  // Handle CTA button click in modal to select option and scroll to form
   const handleCTAClick = (value) => {
     setFormData((prev) => ({ ...prev, selectedOption: value }));
-    setSelectedCard(null);
+    setSelectedCard(null); // Close modal
     setTimeout(() => {
       document.getElementById('mentoria-form').scrollIntoView({ behavior: 'smooth' });
-    }, 300);
+    }, 300); // Smooth scroll to form after 300ms
   };
 
+  // Handle form input changes
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Validate required fields
     if (!formData.name || !formData.email || !formData.selectedOption) {
       setError('Preencha todos os campos obrigatórios.');
       return;
     }
 
-    setError(null);
-    await sendMentoria(formData);
-
+    setError(null); // Clear previous errors
+    setIsLoading(true); // Set loading state
     const selectedOpt = options.find(opt => opt.value === formData.selectedOption);
 
-    if (selectedOpt.value === 'live') {
-      setSuccess('✅ Inscrição para a Live Gratuita enviada com sucesso! Verifique seu e-mail.');
-      setTimeout(() => setSuccess(null), 5000);
-    } else if (selectedOpt.hotmartLink) {
-      window.location.href = selectedOpt.hotmartLink;
+    try {
+      if (selectedOpt.value === 'live') {
+        // For Live Gratuita: Submit form data and show success message
+        await sendMentoria(formData);
+        setSuccess('✅ Inscrição para a Live Gratuita enviada com sucesso! Verifique seu e-mail.');
+        setTimeout(() => setSuccess(null), 5000); // Clear success message after 5s
+      } else if (selectedOpt.hotmartLink) {
+        // For paid options (e.g., Sala Secreta): Submit form data and redirect to Hotmart
+        await sendMentoria(formData);
+        window.location.href = selectedOpt.hotmartLink;
+      }
+    } catch (error) {
+      // Handle API errors
+      setError('Erro ao enviar os dados. Tente novamente.');
+      console.error('API error:', error);
+    } finally {
+      setIsLoading(false); // Clear loading state
     }
   };
 
+  // Dynamically set button text: "Enviar" for Live Gratuita, "Ir para Pagamento" for others
+  const buttonText = formData.selectedOption === 'live' ? 'Enviar' : 'Ir para Pagamento';
+
   return (
     <section className="py-20 bg-gradient-to-r from-[#1e1e28] to-[#2e2e3e] text-white">
+      {/* Main container */}
       <div className="max-w-4xl mx-auto text-center px-4">
+        {/* Section title */}
         <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-red-500">
           Transforme Sua Vida Após o Divórcio
         </h2>
+        {/* Section subtitle */}
         <p className="text-lg md:text-xl text-gray-300 mb-8">
           Participe das Lives & Mentorias Exclusivas com Thaís Rosa
         </p>
 
+        {/* Cards grid for options */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
           {options.map((opt, i) => (
             <div
@@ -132,6 +162,7 @@ const LivesMentorias = () => {
           ))}
         </div>
 
+        {/* Info banner with calendar icon */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -142,29 +173,88 @@ const LivesMentorias = () => {
           <p>Escolha abaixo o tipo de encontro e receba o link após o pagamento.</p>
         </motion.div>
 
-        <form id="mentoria-form" onSubmit={handleSubmit} className="space-y-4 text-white text-left bg-[#151515]/80 border border-purple-500/20 rounded-3xl shadow-[0_0_35px_rgba(128,90,213,0.5)] p-6 max-w-md mx-auto">
-          <input name="name" type="text" placeholder="Nome" value={formData.name} onChange={handleChange} className="w-full p-3 rounded-md border border-purple-500/30 bg-black/30" required />
-          <input name="email" type="email" placeholder="E-mail" value={formData.email} onChange={handleChange} className="w-full p-3 rounded-md border border-purple-500/30 bg-black/30" required />
-          <input name="whatsapp" type="text" placeholder="WhatsApp (opcional)" value={formData.whatsapp} onChange={handleChange} className="w-full p-3 rounded-md border border-purple-500/30 bg-black/30" />
-          <select name="selectedOption" value={formData.selectedOption} onChange={handleChange} className="w-full p-3 rounded-md border border-purple-500/30 bg-black/30" required>
+        {/* Form for user input */}
+        <form
+          id="mentoria-form"
+          onSubmit={handleSubmit}
+          className="space-y-4 text-white text-left bg-[#151515]/80 border border-purple-500/20 rounded-3xl shadow-[0_0_35px_rgba(128,90,213,0.5)] p-6 max-w-md mx-auto"
+        >
+          <input
+            name="name"
+            type="text"
+            placeholder="Nome"
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full p-3 rounded-md border border-purple-500/30 bg-black/30"
+            required
+          />
+          <input
+            name="email"
+            type="email"
+            placeholder="E-mail"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full p-3 rounded-md border border-purple-500/30 bg-black/30"
+            required
+          />
+          <input
+            name="whatsapp"
+            type="text"
+            placeholder="WhatsApp (opcional)"
+            value={formData.whatsapp}
+            onChange={handleChange}
+            className="w-full p-3 rounded-md border border-purple-500/30 bg-black/30"
+          />
+          <select
+            name="selectedOption"
+            value={formData.selectedOption}
+            onChange={handleChange}
+            className="w-full p-3 rounded-md border border-purple-500/30 bg-black/30"
+            required
+          >
             <option value="">Selecione o tipo de encontro</option>
-            {options.map((opt, i) => (<option key={i} value={opt.value}>{opt.label}</option>))}
+            {options.map((opt, i) => (
+              <option key={i} value={opt.value}>{opt.label}</option>
+            ))}
           </select>
-          <button type="submit" className="w-full py-3 rounded-md font-semibold text-white shadow-lg transition bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:brightness-110">
-            Ir para Pagamento
+          {/* Submit button with dynamic text and loading state */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`w-full py-3 rounded-md font-semibold text-white shadow-lg transition bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:brightness-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isLoading ? 'Processando...' : buttonText}
           </button>
+          {/* Error message display */}
           {error && <p className="text-red-400 mt-4">{error}</p>}
+          {/* Success message display */}
           {success && <p className="text-green-400 mt-4">{success}</p>}
         </form>
       </div>
 
+      {/* Modal for displaying selected option details */}
       <AnimatePresence>
         {selectedCard && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-4" onClick={() => setSelectedCard(null)}>
-            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="bg-[#1e1e28] max-w-2xl w-full p-6 rounded-xl shadow-xl text-white overflow-y-auto max-h-[80vh]">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-4"
+            onClick={() => setSelectedCard(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#1e1e28] max-w-2xl w-full p-6 rounded-xl shadow-xl text-white overflow-y-auto max-h-[80vh]"
+            >
               <h3 className="text-2xl font-bold mb-4">{selectedCard.label}</h3>
               <p className="text-gray-300 whitespace-pre-line mb-6">{selectedCard.description}</p>
-              <button onClick={() => handleCTAClick(selectedCard.value)} className="px-6 py-3 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-md text-white font-semibold hover:brightness-110">
+              <button
+                onClick={() => handleCTAClick(selectedCard.value)}
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-md text-white font-semibold hover:brightness-110"
+              >
                 {selectedCard.ctaText}
               </button>
             </motion.div>
