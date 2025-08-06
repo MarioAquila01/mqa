@@ -12,10 +12,10 @@ import NotFound from './components/NotFound';
 import PrivateRoute from './components/PrivateRoute';
 import LivesMentorias from './components/LivesMentorias';
 
-// Painel Admin Components
-import DashboardAdmin from './components/admin/AdminDashboard';
-import AdminLeadsList from './components/admin/AdminLeadsList';
-import AdminTemplateEditor from './components/admin/AdminTemplateEditor'; // ✅ Import Editor de Templates
+// ✅ Corrigido importação com "Admin" maiúsculo (case-sensitive no Render)
+import DashboardAdmin from './components/Admin/AdminDashboard';
+import AdminLeadsList from './components/Admin/AdminLeadsList';
+import AdminTemplateEditor from './components/Admin/AdminTemplateEditor';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -66,7 +66,7 @@ const App = () => {
         <Route
           path="/admin-dashboard"
           element={
-            <PrivateRoute>
+            <PrivateRoute adminOnly>
               <DashboardAdmin />
             </PrivateRoute>
           }
@@ -76,7 +76,7 @@ const App = () => {
         <Route
           path="/admin-dashboard/ebook-leads"
           element={
-            <PrivateRoute>
+            <PrivateRoute adminOnly>
               <AdminLeadsList />
             </PrivateRoute>
           }
@@ -86,7 +86,7 @@ const App = () => {
         <Route
           path="/admin-dashboard/emails"
           element={
-            <PrivateRoute>
+            <PrivateRoute adminOnly>
               <AdminTemplateEditor />
             </PrivateRoute>
           }
