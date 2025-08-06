@@ -7,106 +7,6 @@ const ETAPAS = ['live', 'sala', 'grupo', 'individual'];
 const STATUS_OPTIONS = ['all', 'interesse', 'pago'];
 const LEADS_PER_PAGE = 10;
 
-// Modelos de e-mails para a etapa "live"
-const EMAIL_TEMPLATES = [
-  {
-    id: 'confirmation',
-    title: 'Confirmação',
-    subject: 'Que bom que você se inscreveu 💗',
-    preheader: 'Essa live pode ser o começo da sua nova história.',
-    body: `Oi, [nome] 💗
-Que bom que você se inscreveu. De verdade.
-Essa live é um espaço que eu desejei muito ter lá atrás, quando tudo dentro de mim estava confuso, quebrado e em silêncio.
-O que sobrou de mim depois do divórcio não foi força. Foi um vazio que ninguém via, mas me consumia.
-E é por isso que esse encontro vai além de um conteúdo:
-é uma conversa real, entre mulheres que estão se reconstruindo, uma a uma, no seu tempo, do seu jeito.
-
-📍 Detalhes da live
-Tema: O que sobrou de mim depois do divórcio
-Data: [inserir data]
-Horário: [inserir horário]
-Duração: 1h a 1h30
-Link de acesso: [inserir link]
-
-Estou muito feliz de ter você lá comigo. 💗
-Com carinho,
-Thaís Rosa
-@melhorqueantesoficial`,
-    date: '',
-    time: '',
-    link: '',
-  },
-  {
-    id: 'reminder_3days',
-    title: 'Lembrete (3 Dias)',
-    subject: 'Faltam 3 dias para o nosso encontro 💗',
-    preheader: 'A live que pode virar a chave da sua reconstrução.',
-    body: `Oi, [nome] 💗
-Faltam 3 dias para a nossa live “O que sobrou de mim depois do divórcio”.
-Eu vou te contar como foi o meu processo, como eu mesma me perdi depois da separação e como comecei a juntar os pedaços por dentro.
-Vai ser mais do que conteúdo.
-Vai ser verdade. E começo.
-
-📍 Guarde essa informação:
-Dia: [data]
-Hora: [horário]
-Link: [link]
-Se ainda não anotou, anota. Se quiser, responde esse e-mail com dúvidas.
-A gente vai juntas.
-Thaís Rosa`,
-    date: '',
-    time: '',
-    link: '',
-  },
-  {
-    id: 'reminder_tomorrow',
-    title: 'Lembrete (Amanhã)',
-    subject: 'É amanhã 💗',
-    preheader: 'Sua vaga tá confirmada e vai ser especial.',
-    body: `Oi, [nome],
-É amanhã.
-Nosso encontro ao vivo. Uma live feita com tudo que eu gostaria de ter ouvido lá atrás, quando me sentia em pedaços e tentava seguir sozinha.
-Amanhã, a gente vai falar do que sobra da gente depois que tudo acaba.
-Do que quebra. Mas também do que ainda pulsa.
-
-📍Lembrete rápido:
-Live: O que sobrou de mim depois do divórcio
-🗓️ Data: [inserir]
-⏰ Horário: [inserir]
-🔗 Link: [inserir link]
-Se puder, chega uns minutinhos antes.
-Vai ser especial.
-Com carinho,
-Thaís`,
-    date: '',
-    time: '',
-    link: '',
-  },
-  {
-    id: 'reminder_today',
-    title: 'Lembrete (Hoje)',
-    subject: 'É hoje. E você não está sozinha 💗',
-    preheader: 'Último lembrete antes da live.',
-    body: `Oi, [nome],
-É hoje.
-Hoje a gente vai se encontrar ao vivo pra conversar com verdade sobre o que sobrou de você depois do fim.
-Se você sente que ainda está tentando se encontrar…
-se tudo parece confuso por dentro…
-essa live é seu ponto de partida.
-
-📍 Informações da live:
-🗓️ Hoje
-⏰ Horário: [inserir]
-🔗 Acesso: [link direto]
-Eu te espero lá. 💗
-Thaís Rosa
-@melhorqueantesoficial`,
-    date: '',
-    time: '',
-    link: '',
-  },
-];
-
 // Reducer para filtros
 const initialFilterState = {
   etapaFilter: 'all',
@@ -132,8 +32,8 @@ const filterReducer = (state, action) => {
 
 const PainelAdminFunil = () => {
   const [leads, setLeads] = useState([]);
+  const [emailTemplates, setEmailTemplates] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState(null);
-  const [emailTemplates, setEmailTemplates] = useState(EMAIL_TEMPLATES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
@@ -143,21 +43,41 @@ const PainelAdminFunil = () => {
 
   const navigate = useNavigate();
 
-  // Busca de leads
+  // Busca de leads e templates
   useEffect(() => {
-    const fetchData = async () => {
+    if (typeof window === 'undefined') {
+      console.log('Prerendering detectado, pulando fetch.');
+      return;
+    }
+
+    const fetchData = async (retries = 3, delay = 1000) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/ebook-leads`);
+        const apiUrl = import.meta.env.VITE_API_URL || 'https://api-mqa.onrender.com';
+        console.log('📡 Tentando buscar dados da API:', apiUrl);
+
+        // Buscar leads
+        const leadsResponse = await axios.get(`${apiUrl}/admin/ebook-leads`, { timeout: 10000 });
+        console.log('✅ Leads recebidos:', leadsResponse.data);
         setLeads(
-          Array.isArray(response.data)
-            ? response.data.map(lead => ({ ...lead, isProspect: lead.isProspect || false }))
+          Array.isArray(leadsResponse.data)
+            ? leadsResponse.data.map(lead => ({ ...lead, isProspect: lead.isProspect || false }))
             : []
         );
+
+        // Buscar templates
+        const templatesResponse = await axios.get(`${apiUrl}/admin/email-templates`, { timeout: 10000 });
+        console.log('✅ Templates recebidos:', templatesResponse.data);
+        setEmailTemplates(templatesResponse.data.filter(t => t.type.startsWith('live_')));
       } catch (error) {
-        console.error('Erro ao buscar leads:', error);
-        setError('Não foi possível carregar os leads. Tente novamente.');
+        console.error('❌ Erro ao buscar dados:', error.message, error.response?.data);
+        if (retries > 0) {
+          console.log(`Tentando novamente em ${delay}ms... (${retries} tentativas restantes)`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return fetchData(retries - 1, delay * 2);
+        }
+        setError(`Não foi possível carregar os dados. Detalhes: ${error.message}`);
         setLeads([]);
       } finally {
         setLoading(false);
@@ -168,11 +88,29 @@ const PainelAdminFunil = () => {
 
   // Manipulação de e-mails
   const handleEmailChange = (field, value) => {
-    setEmailTemplates(prev =>
-      prev.map(template =>
-        template.id === selectedEmail.id ? { ...template, [field]: value } : template
-      )
-    );
+    setSelectedEmail(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveEmailTemplate = async () => {
+    if (!selectedEmail) return;
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'https://api-mqa.onrender.com'}/admin/email-templates/update`, {
+        type: selectedEmail.type,
+        data: {
+          subject: selectedEmail.subject,
+          preheader: selectedEmail.preheader,
+          body: selectedEmail.body,
+          placeholders: selectedEmail.placeholders
+        }
+      });
+      setEmailTemplates(prev =>
+        prev.map(t => (t.type === selectedEmail.type ? selectedEmail : t))
+      );
+      alert('Template atualizado com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao salvar template:', error.message);
+      setError('Erro ao salvar template.');
+    }
   };
 
   const handleSendEmail = async () => {
@@ -180,7 +118,7 @@ const PainelAdminFunil = () => {
       setError('Selecione um e-mail para enviar.');
       return;
     }
-    if (!selectedEmail.subject || !selectedEmail.body || !selectedEmail.link) {
+    if (!selectedEmail.subject || !selectedEmail.body || !selectedEmail.placeholders.link) {
       setError('Assunto, corpo e link do e-mail são obrigatórios.');
       return;
     }
@@ -192,19 +130,17 @@ const PainelAdminFunil = () => {
       return;
     }
     try {
-      // Simulação de envio na API
-      // await axios.post(`${import.meta.env.VITE_API_URL}/admin/send-emails`, {
-      //   leads: leadsToSend,
-      //   email: { ...selectedEmail, body: selectedEmail.body.replace('[nome]', '{nome}') }
-      // });
-      if (window.confirm(`Enviar e-mail "${selectedEmail.title}" para ${leadsToSend.length} leads na etapa "live"?`)) {
-        alert(`E-mails disparados para ${leadsToSend.length} leads.`);
-        setSelectedLeads(new Set());
-        setSelectedEmail(null);
-        setError(null);
-      }
+      console.log('📧 Enviando e-mail:', selectedEmail, 'para leads:', leadsToSend);
+      await axios.post(`${import.meta.env.VITE_API_URL || 'https://api-mqa.onrender.com'}/admin/send-email`, {
+        type: selectedEmail.type,
+        leads: leadsToSend
+      });
+      alert(`E-mails disparados para ${leadsToSend.length} leads.`);
+      setSelectedLeads(new Set());
+      setSelectedEmail(null);
+      setError(null);
     } catch (error) {
-      console.error('Erro ao enviar e-mails:', error);
+      console.error('❌ Erro ao enviar e-mails:', error.message);
       setError('Erro ao enviar e-mails.');
     }
   };
@@ -233,8 +169,8 @@ const PainelAdminFunil = () => {
       return;
     }
     try {
-      // Simulação de atualização na API
-      // await axios.put(`${import.meta.env.VITE_API_URL}/admin/ebook-leads/${editingLead.id}`, editingLead);
+      console.log('Salvando lead:', editingLead);
+      await axios.put(`${import.meta.env.VITE_API_URL || 'https://api-mqa.onrender.com'}/admin/ebook-leads/${editingLead.id}`, editingLead);
       setLeads(prev =>
         prev.map(lead => (lead.id === editingLead.id ? { ...editingLead } : lead))
       );
@@ -242,7 +178,7 @@ const PainelAdminFunil = () => {
       setError(null);
       alert('Lead atualizado com sucesso.');
     } catch (error) {
-      console.error('Erro ao atualizar lead:', error);
+      console.error('Erro ao atualizar lead:', error.message);
       setError('Erro ao atualizar lead.');
     }
   };
@@ -252,15 +188,15 @@ const PainelAdminFunil = () => {
     try {
       const updatedLead = leads.find(lead => lead.id === leadId);
       const newProspectStatus = !updatedLead.isProspect;
-      // Simulação de atualização na API
-      // await axios.patch(`${import.meta.env.VITE_API_URL}/admin/ebook-leads/${leadId}`, { isProspect: newProspectStatus });
+      console.log('Atualizando prospecção do lead:', leadId, newProspectStatus);
+      await axios.patch(`${import.meta.env.VITE_API_URL || 'https://api-mqa.onrender.com'}/admin/ebook-leads/${leadId}`, { isProspect: newProspectStatus });
       setLeads(prev =>
         prev.map(lead =>
           lead.id === leadId ? { ...lead, isProspect: newProspectStatus } : lead
         )
       );
     } catch (error) {
-      console.error('Erro ao atualizar status de prospecção:', error);
+      console.error('Erro ao atualizar status de prospecção:', error.message);
       setError('Erro ao atualizar status de prospecção.');
     }
   };
@@ -299,7 +235,6 @@ const PainelAdminFunil = () => {
           </option>
         ))}
       </select>
-
       <select
         value={filterState.statusFilter}
         onChange={e => dispatch({ type: 'SET_STATUS_FILTER', payload: e.target.value })}
@@ -311,7 +246,6 @@ const PainelAdminFunil = () => {
           </option>
         ))}
       </select>
-
       <select
         value={filterState.prospectFilter}
         onChange={e => dispatch({ type: 'SET_PROSPECT_FILTER', payload: e.target.value })}
@@ -321,7 +255,6 @@ const PainelAdminFunil = () => {
         <option value="prospect">Prospectáveis</option>
         <option value="non-prospect">Não Prospectáveis</option>
       </select>
-
       <input
         type="text"
         placeholder="Buscar por nome ou e-mail"
@@ -329,9 +262,8 @@ const PainelAdminFunil = () => {
         onChange={e => dispatch({ type: 'SET_SEARCH_TERM', payload: e.target.value })}
         className="p-2 rounded bg-gray-700 text-white text-base w-full md:w-auto"
       />
-
       <button
-        onClick={() => setSelectedEmail(EMAIL_TEMPLATES[0])}
+        onClick={() => setSelectedEmail(emailTemplates[0] || null)}
         className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-base font-semibold"
       >
         Editar E-mails (Live)
@@ -343,15 +275,15 @@ const PainelAdminFunil = () => {
   const renderEmailEditor = () => selectedEmail && (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-800 p-6 rounded-xl text-white max-w-lg w-full">
-        <h3 className="text-xl font-semibold mb-4 text-white">Editar E-mail: {selectedEmail.title}</h3>
+        <h3 className="text-xl font-semibold mb-4 text-white">Editar E-mail: {selectedEmail.type.replace('live_', '')}</h3>
         <select
-          value={selectedEmail.id}
-          onChange={e => setSelectedEmail(emailTemplates.find(t => t.id === e.target.value))}
+          value={selectedEmail.type}
+          onChange={e => setSelectedEmail(emailTemplates.find(t => t.type === e.target.value))}
           className="w-full p-2 mb-4 rounded bg-gray-700 text-white text-base"
         >
           {emailTemplates.map(template => (
-            <option key={template.id} value={template.id}>
-              {template.title}
+            <option key={template.type} value={template.type}>
+              {template.type.replace('live_', '')}
             </option>
           ))}
         </select>
@@ -379,25 +311,31 @@ const PainelAdminFunil = () => {
         <input
           type="text"
           placeholder="Data (ex.: 10/08/2025)"
-          value={selectedEmail.date}
-          onChange={e => handleEmailChange('date', e.target.value)}
+          value={selectedEmail.placeholders.date}
+          onChange={e => handleEmailChange('placeholders', { ...selectedEmail.placeholders, date: e.target.value })}
           className="w-full p-2 mb-4 rounded bg-gray-700 text-white text-base"
         />
         <input
           type="text"
           placeholder="Horário (ex.: 20:00)"
-          value={selectedEmail.time}
-          onChange={e => handleEmailChange('time', e.target.value)}
+          value={selectedEmail.placeholders.time}
+          onChange={e => handleEmailChange('placeholders', { ...selectedEmail.placeholders, time: e.target.value })}
           className="w-full p-2 mb-4 rounded bg-gray-700 text-white text-base"
         />
         <input
           type="text"
           placeholder="Link de Acesso"
-          value={selectedEmail.link}
-          onChange={e => handleEmailChange('link', e.target.value)}
+          value={selectedEmail.placeholders.link}
+          onChange={e => handleEmailChange('placeholders', { ...selectedEmail.placeholders, link: e.target.value })}
           className="w-full p-2 mb-4 rounded bg-gray-700 text-white text-base"
         />
         <div className="flex gap-4">
+          <button
+            onClick={handleSaveEmailTemplate}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-base font-semibold"
+          >
+            Salvar Template
+          </button>
           <button
             onClick={handleSendEmail}
             className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-base font-semibold"
@@ -568,7 +506,6 @@ const PainelAdminFunil = () => {
   return (
     <div className="p-6 bg-gray-900 min-h-screen">
       <h2 className="text-4xl font-bold mb-6 text-white">Painel de Funil de Vendas</h2>
-
       <div className="flex gap-4 mb-6">
         <button
           onClick={() => navigate('/admin-dashboard/ebook-leads')}
@@ -583,13 +520,10 @@ const PainelAdminFunil = () => {
           Ver Pagamentos (Hotmart)
         </button>
       </div>
-
       {error && <p className="text-red-500 mb-4 text-base">{error}</p>}
-
       {renderFilters()}
       {renderEmailEditor()}
       {renderEditForm()}
-
       {loading ? (
         <p className="text-white text-base">Carregando leads...</p>
       ) : filteredLeads.length === 0 ? (
