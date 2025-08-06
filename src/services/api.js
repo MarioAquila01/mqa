@@ -1,4 +1,4 @@
-// src/services/api.js (URL fixa configurada)
+// src/services/api.js
 import axios from 'axios';
 
 // 🔒 URL fixa da API Render
@@ -11,7 +11,11 @@ const api = axios.create({
   },
 });
 
-// ✅ Função de envio do Ebook
+// ==============================
+// FUNÇÕES DE ENVIO DE DADOS
+// ==============================
+
+// ✅ Envio do Ebook
 export const sendEbook = async (data) => {
   try {
     const response = await api.post('/ebook', data);
@@ -23,7 +27,7 @@ export const sendEbook = async (data) => {
   }
 };
 
-// ✅ Função de envio das Mentorias
+// ✅ Envio das Mentorias
 export const sendMentoria = async (data) => {
   try {
     const response = await api.post('/api/send/mentoria', data);
@@ -35,7 +39,7 @@ export const sendMentoria = async (data) => {
   }
 };
 
-// ✅ Função de envio do Contato
+// ✅ Envio do Contato
 export const sendContato = async (data) => {
   try {
     const response = await api.post('/send/contato', data);
@@ -43,6 +47,54 @@ export const sendContato = async (data) => {
     return response.data;
   } catch (error) {
     console.error('❌ Erro ao enviar Contato:', error.response || error);
+    throw error;
+  }
+};
+
+// ==============================
+// FUNÇÕES DE CONSULTA ADMIN
+// ==============================
+
+// ✅ Buscar Leads do Ebook
+export const getEbookLeads = async () => {
+  try {
+    const response = await api.get('/admin/ebookleads');
+    return response.data;
+  } catch (error) {
+    console.error('❌ Erro ao buscar leads do Ebook:', error.response || error);
+    throw error;
+  }
+};
+
+// ✅ Buscar Leads de Mentoria
+export const getMentoriaLeads = async () => {
+  try {
+    const response = await api.get('/admin/mentorialeads');
+    return response.data;
+  } catch (error) {
+    console.error('❌ Erro ao buscar leads da Mentoria:', error.response || error);
+    throw error;
+  }
+};
+
+// ✅ Buscar Pagamentos
+export const getPagamentos = async () => {
+  try {
+    const response = await api.get('/admin/pagamentos');
+    return response.data;
+  } catch (error) {
+    console.error('❌ Erro ao buscar pagamentos:', error.response || error);
+    throw error;
+  }
+};
+
+// ✅ Buscar Templates de Email
+export const getEmailTemplates = async () => {
+  try {
+    const response = await api.get('/admin/email-templates');
+    return response.data;
+  } catch (error) {
+    console.error('❌ Erro ao buscar templates de e-mail:', error.response || error);
     throw error;
   }
 };
