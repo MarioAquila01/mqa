@@ -55,10 +55,10 @@ export const sendContato = async (data) => {
 // FUNÇÕES DE CONSULTA ADMIN
 // ==============================
 
-// ✅ Buscar Leads do Ebook
+// ✅ Buscar Leads do Ebook (rota corrigida)
 export const getEbookLeads = async () => {
   try {
-    const response = await api.get('/admin/ebookleads');
+    const response = await api.get('/ebook/leads');
     return response.data;
   } catch (error) {
     console.error('❌ Erro ao buscar leads do Ebook:', error.response || error);
