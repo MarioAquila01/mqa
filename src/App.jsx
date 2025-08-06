@@ -1,3 +1,4 @@
+// --- 4. ATUALIZAR App.jsx ---
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './components/Home';
@@ -17,6 +18,7 @@ import DashboardAdmin from './components/Admin/AdminDashboard';
 import AdminLeadsList from './components/Admin/AdminLeadsList';         // Leads Mentoria
 import AdminTemplateEditor from './components/Admin/AdminTemplateEditor';
 import EbookLeadsList from './components/Admin/EbookLeadsList';         // Leads Ebook
+import AdminPagamentosList from './components/Admin/AdminPagamentosList';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -31,7 +33,6 @@ const App = () => {
     <Router>
       <Navbar />
       <Routes>
-        {/* Home e seções */}
         {['/', ...pageSections.map(s => `/${s.name}`)].map(path => {
           const sectionName = path === '/' ? null : path.slice(1);
           return (
@@ -43,7 +44,6 @@ const App = () => {
           );
         })}
 
-        {/* Aliases */}
         {pageSections.flatMap(section =>
           (section.aliases || []).map(alias => (
             <Route
@@ -54,16 +54,10 @@ const App = () => {
           ))
         )}
 
-        {/* Acesso Vip */}
         <Route path="/acesso-vip" element={<AcessoVip />} />
-
-        {/* Login */}
         <Route path="/login" element={<Login />} />
-
-        {/* Página Lives e Mentorias */}
         <Route path="/lives-mentorias" element={<LivesMentorias />} />
 
-        {/* Painel Administrativo Dashboard */}
         <Route
           path="/admin-dashboard"
           element={
@@ -73,7 +67,15 @@ const App = () => {
           }
         />
 
-        {/* Leads do E-book */}
+        <Route
+          path="/admin-dashboard/pagamentos"
+          element={
+            <PrivateRoute adminOnly>
+              <AdminPagamentosList />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/admin-dashboard/ebook-leads"
           element={
@@ -83,7 +85,6 @@ const App = () => {
           }
         />
 
-        {/* Leads das Mentorias */}
         <Route
           path="/admin-dashboard/mentoria-leads"
           element={
@@ -93,7 +94,6 @@ const App = () => {
           }
         />
 
-        {/* Editor de Templates de E-mails */}
         <Route
           path="/admin-dashboard/emails"
           element={
@@ -103,17 +103,7 @@ const App = () => {
           }
         />
 
-        {/* Área VIP protegida */}
-        <Route
-          path="/AreaVip"
-          element={
-            <PrivateRoute>
-              <AreaVip />
-            </PrivateRoute>
-          }
-        />
-
-        {/* 404 */}
+        <Route path="/AreaVip" element={<PrivateRoute><AreaVip /></PrivateRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
