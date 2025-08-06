@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 
 // Constantes
 const ETAPAS = ['live', 'sala', 'grupo', 'individual'];
@@ -13,6 +14,7 @@ const initialFilterState = {
   statusFilter: 'all',
   searchTerm: '',
   prospectFilter: 'all',
+  eventDateFilter: 'all',
 };
 
 const filterReducer = (state, action) => {
@@ -25,6 +27,8 @@ const filterReducer = (state, action) => {
       return { ...state, searchTerm: action.payload };
     case 'SET_PROSPECT_FILTER':
       return { ...state, prospectFilter: action.payload };
+    case 'SET_EVENT_DATE_FILTER':
+      return { ...state, eventDateFilter: action.payload };
     default:
       return state;
   }
@@ -62,7 +66,7 @@ const PainelAdminFunil = () => {
         console.log('✅ Leads recebidos:', leadsResponse.data);
         setLeads(
           Array.isArray(leadsResponse.data)
-            ? leadsResponse.data.map(lead => ({ ...lead, isProspect: lead.isProspect || false }))
+            ? leadsResponse.data.map(lead => ({ ...lead, isProspect: lead.isProspect || false, eventDate: lead.eventDate || '' }))
             : []
         );
 
@@ -85,6 +89,23 @@ const PainelAdminFunil = () => {
     };
     fetchData();
   }, []);
+
+  // Exportar leads para Excel
+  const exportToExcel = () => {
+    const exportData = filteredLeads.map(lead => ({
+      Nome: lead.name,
+      Email: lead.email,
+      Etapa: lead.selectedOption || '-',
+      Status: lead.status || '-',
+      Prospectável: lead.isProspect ? 'Sim' : 'Não',
+      'Data do Evento': lead.eventDate || '-',
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Leads');
+    XLSX.writeFile(workbook, `leads_export_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
 
   // Manipulação de e-mails
   const handleEmailChange = (field, value) => {
@@ -210,7 +231,8 @@ const PainelAdminFunil = () => {
       const matchSearch =
         lead.name.toLowerCase().includes(filterState.searchTerm.toLowerCase()) ||
         lead.email.toLowerCase().includes(filterState.searchTerm.toLowerCase());
-      return matchEtapa && matchStatus && matchProspect && matchSearch;
+      const matchEventDate = filterState.eventDateFilter === 'all' || lead.eventDate === filterState.eventDateFilter;
+      return matchEtapa && matchStatus && matchProspect && matchSearch && matchEventDate;
     });
   }, [leads, filterState]);
 
@@ -219,6 +241,12 @@ const PainelAdminFunil = () => {
     const start = (page - 1) * LEADS_PER_PAGE;
     return filteredLeads.slice(start, start + LEADS_PER_PAGE);
   }, [filteredLeads, page]);
+
+  // Obter datas de eventos únicas
+  const eventDates = useMemo(() => {
+    const dates = new Set(leads.map(lead => lead.eventDate).filter(date => date));
+    return ['all', ...Array.from(dates).sort()];
+  }, [leads]);
 
   // Renderização dos filtros
   const renderFilters = () => (
@@ -255,6 +283,18 @@ const PainelAdminFunil = () => {
         <option value="prospect">Prospectáveis</option>
         <option value="non-prospect">Não Prospectáveis</option>
       </select>
+      <select
+        value={filterState.eventDateFilter}
+        onChange={e => dispatch({ type: 'SET_EVENT_DATE_FILTER', payload: e.target.value })}
+        className="p-2 rounded bg-gray-700 text-white text-base"
+      >
+        <option value="all">Todas as Datas</option>
+        {eventDates.filter(date => date !== 'all').map(date => (
+          <option key={date} value={date}>
+            {date}
+          </option>
+        ))}
+      </select>
       <input
         type="text"
         placeholder="Buscar por nome ou e-mail"
@@ -267,6 +307,12 @@ const PainelAdminFunil = () => {
         className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-base font-semibold"
       >
         Editar E-mails (Live)
+      </button>
+      <button
+        onClick={exportToExcel}
+        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-base font-semibold"
+      >
+        Exportar para Excel
       </button>
     </div>
   );
@@ -394,6 +440,13 @@ const PainelAdminFunil = () => {
             </option>
           ))}
         </select>
+        <input
+          type="text"
+          placeholder="Data do Evento (ex.: 10/08/2025)"
+          value={editingLead.eventDate}
+          onChange={e => setEditingLead({ ...editingLead, eventDate: e.target.value })}
+          className="w-full p-2 mb-4 rounded bg-gray-700 text-white text-base"
+        />
         <div className="flex items-center mb-4">
           <input
             type="checkbox"
@@ -444,6 +497,7 @@ const PainelAdminFunil = () => {
             <th className="p-3 border-b text-white text-base font-semibold">E-mail</th>
             <th className="p-3 border-b text-white text-base font-semibold">Etapa</th>
             <th className="p-3 border-b text-white text-base font-semibold">Status</th>
+            <th className="p-3 border-b text-white text-base font-semibold">Data do Evento</th>
             <th className="p-3 border-b text-white text-base font-semibold">Prospectável</th>
             <th className="p-3 border-b text-white text-base font-semibold">Ações</th>
           </tr>
@@ -462,6 +516,7 @@ const PainelAdminFunil = () => {
               <td className="p-3 text-white text-base">{lead.email}</td>
               <td className="p-3 text-white text-base">{lead.selectedOption || '-'}</td>
               <td className="p-3 text-white text-base">{lead.status || '-'}</td>
+              <td className="p-3 text-white text-base">{lead.eventDate || '-'}</td>
               <td className="p-3">
                 <input
                   type="checkbox"
