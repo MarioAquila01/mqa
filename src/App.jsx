@@ -1,4 +1,3 @@
-// --- 4. ATUALIZAR App.jsx ---
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './components/Home';
@@ -13,11 +12,9 @@ import NotFound from './components/NotFound';
 import PrivateRoute from './components/PrivateRoute';
 import LivesMentorias from './components/LivesMentorias';
 
-// Painel Administrativo
-import DashboardAdmin from './components/Admin/AdminDashboard';
-import AdminLeadsList from './components/Admin/AdminLeadsList';         // Leads Mentoria
-import AdminTemplateEditor from './components/Admin/AdminTemplateEditor';
-import EbookLeadsList from './components/Admin/EbookLeadsList';         // Leads Ebook
+// Painel Administrativo Novo
+import PainelAdminFunil from './components/Admin/PainelAdminFunil';
+import EbookLeadsList from './components/Admin/EbookLeadsList';
 import AdminPagamentosList from './components/Admin/AdminPagamentosList';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -62,16 +59,7 @@ const App = () => {
           path="/admin-dashboard"
           element={
             <PrivateRoute adminOnly>
-              <DashboardAdmin />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin-dashboard/pagamentos"
-          element={
-            <PrivateRoute adminOnly>
-              <AdminPagamentosList />
+              <PainelAdminFunil />
             </PrivateRoute>
           }
         />
@@ -86,19 +74,10 @@ const App = () => {
         />
 
         <Route
-          path="/admin-dashboard/mentoria-leads"
+          path="/admin-dashboard/pagamentos"
           element={
             <PrivateRoute adminOnly>
-              <AdminLeadsList />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin-dashboard/emails"
-          element={
-            <PrivateRoute adminOnly>
-              <AdminTemplateEditor />
+              <AdminPagamentosList />
             </PrivateRoute>
           }
         />
