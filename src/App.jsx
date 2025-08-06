@@ -12,6 +12,11 @@ import NotFound from './components/NotFound';
 import PrivateRoute from './components/PrivateRoute';
 import LivesMentorias from './components/LivesMentorias';
 
+// Painel Admin Components
+import DashboardAdmin from './components/admin/AdminDashboard';
+import AdminLeadsList from './components/admin/AdminLeadsList';
+import AdminTemplateEditor from './components/admin/AdminTemplateEditor'; // ✅ Import Editor de Templates
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 const App = () => {
@@ -51,12 +56,41 @@ const App = () => {
         {/* Acesso Vip */}
         <Route path="/acesso-vip" element={<AcessoVip />} />
 
-
         {/* Login */}
         <Route path="/login" element={<Login />} />
-        
+
         {/* Página Lives e Mentorias */}
         <Route path="/lives-mentorias" element={<LivesMentorias />} />
+
+        {/* Painel Administrativo Dashboard */}
+        <Route
+          path="/admin-dashboard"
+          element={
+            <PrivateRoute>
+              <DashboardAdmin />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Leads do E-book */}
+        <Route
+          path="/admin-dashboard/ebook-leads"
+          element={
+            <PrivateRoute>
+              <AdminLeadsList />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Editor de Templates de E-mails */}
+        <Route
+          path="/admin-dashboard/emails"
+          element={
+            <PrivateRoute>
+              <AdminTemplateEditor />
+            </PrivateRoute>
+          }
+        />
 
         {/* Área VIP protegida */}
         <Route
