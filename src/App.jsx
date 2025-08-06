@@ -12,10 +12,11 @@ import NotFound from './components/NotFound';
 import PrivateRoute from './components/PrivateRoute';
 import LivesMentorias from './components/LivesMentorias';
 
-// ✅ Corrigido importação com "Admin" maiúsculo (case-sensitive no Render)
+// Painel Administrativo
 import DashboardAdmin from './components/Admin/AdminDashboard';
-import AdminLeadsList from './components/Admin/AdminLeadsList';
+import AdminLeadsList from './components/Admin/AdminLeadsList';         // Leads Mentoria
 import AdminTemplateEditor from './components/Admin/AdminTemplateEditor';
+import EbookLeadsList from './components/Admin/EbookLeadsList';         // Leads Ebook
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -75,6 +76,16 @@ const App = () => {
         {/* Leads do E-book */}
         <Route
           path="/admin-dashboard/ebook-leads"
+          element={
+            <PrivateRoute adminOnly>
+              <EbookLeadsList />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Leads das Mentorias */}
+        <Route
+          path="/admin-dashboard/mentoria-leads"
           element={
             <PrivateRoute adminOnly>
               <AdminLeadsList />

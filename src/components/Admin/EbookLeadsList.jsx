@@ -11,10 +11,11 @@ const EbookLeadsList = () => {
 
   const fetchLeads = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/ebook/leads`);
-      setLeads(response.data);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/ebook-leads`);
+      setLeads(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Erro ao buscar leads do Ebook:', error);
+      setLeads([]);
     } finally {
       setLoading(false);
     }
@@ -24,11 +25,11 @@ const EbookLeadsList = () => {
     const csvContent = [
       ['Nome', 'E-mail', 'E-book', 'Indicação Nome', 'Indicação WhatsApp'],
       ...leads.map(lead => [
-        lead.name,
-        lead.email,
-        lead.ebookChoice,
+        lead.name || '',
+        lead.email || '',
+        lead.ebookOption || '',
         lead.indicationName || '',
-        lead.indicationWhatsApp || ''
+        lead.indicationWhatsapp || ''
       ])
     ].map(e => e.join(",")).join("\n");
 
@@ -52,6 +53,8 @@ const EbookLeadsList = () => {
       </button>
       {loading ? (
         <p>Carregando...</p>
+      ) : leads.length === 0 ? (
+        <p>Nenhum lead encontrado.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-[#1e1e28] border border-purple-500">
@@ -69,9 +72,9 @@ const EbookLeadsList = () => {
                 <tr key={idx} className="text-center border-b border-purple-500">
                   <td className="p-3">{lead.name}</td>
                   <td className="p-3">{lead.email}</td>
-                  <td className="p-3">{lead.ebookChoice}</td>
+                  <td className="p-3">{lead.ebookOption || '-'}</td>
                   <td className="p-3">{lead.indicationName || '-'}</td>
-                  <td className="p-3">{lead.indicationWhatsApp || '-'}</td>
+                  <td className="p-3">{lead.indicationWhatsapp || '-'}</td>
                 </tr>
               ))}
             </tbody>
