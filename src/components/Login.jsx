@@ -47,8 +47,9 @@ const Login = () => {
         setError('Login falhou.');
       }
     } catch (err) {
-      console.error(err);
-      setError('Erro ao fazer login. Verifique suas credenciais.');
+      // ✅ Exibe a mensagem de erro da API, se existir, ou uma mensagem padrão.
+      const errorMessage = err.response?.data?.message || 'Erro ao fazer login. Verifique suas credenciais.';
+      setError(errorMessage);
     }
   };
 
