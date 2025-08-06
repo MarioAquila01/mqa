@@ -28,8 +28,8 @@ const Login = () => {
 
     try {
       // Requisição para rota de login da API (auth/login)
-      const response = await api.post('/auth/login', { email, password });
-      const { token, user } = response.data;
+     const response = await api.post('/auth/login-admin', { email, password });
+     const { token, user } = response.data;
 
       if (token) {
         // Armazenando o token JWT e dados no localStorage
