@@ -29,7 +29,7 @@ export const sendEbook = async (data) => {
 // ✅ Envio das Mentorias
 export const sendMentoria = async (data) => {
   try {
-    const response = await api.post('/api/send/mentoria', data);
+    const response = await api.post('/send/mentoria', data); // ✅ corrigido
     console.log('✅ Mentoria enviada com sucesso:', response.data);
     return response.data;
   } catch (error) {
@@ -37,6 +37,7 @@ export const sendMentoria = async (data) => {
     throw error;
   }
 };
+
 
 // ✅ Envio do Contato
 export const sendContato = async (data) => {
