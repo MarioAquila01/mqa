@@ -11,15 +11,22 @@ const options = [
     image: '/assets/img/1.png',
     glowColor: 'bg-green-500/20',
     ctaText: '👉 Quero participar da Live Gratuita',
-    hotmartLink: '', // No payment link for free live
-    description: `Talvez ninguém veja, mas por dentro você sente que algo se perdeu. O que antes te definia agora parece distante, confusa ou quebrada.
+    hotmartLink: '',
+    description: `LIVE GRATUITA – O que sobrou de mim depois do divórcio?
+Talvez ninguém veja, mas por dentro você sente que algo se perdeu.
+O que antes te definia agora parece distante, confusa ou quebrada.
+Se você já tentou seguir em frente, mas sente que ainda não se encontrou… essa conversa é pra você.
+______________
 
-O que você vai viver nessa live:
-• Sensação de vazio após o divórcio.
-• Como reconstruir sua identidade.
-• Caminho possível de reconstrução.
-Duração: 1h a 1h30
-Valor: Gratuito`
+O que eu vou te contar nessa live:
+* Minha história, como a minha identidade se desmontou depois do divórcio, e como comecei a reconstruir, passo a passo.
+* O que eu aprendi sobre o luto que ninguém vê.
+* Quais  foram os primeiros gestos que realmente me ajudaram a voltar pra mim.
+* E por que hoje eu consigo olhar pra tudo isso sem vergonha, sem culpa e com uma força que antes eu nem sabia que existia.
+
+Duração aproximada: 1h30
+Essa live é o primeiro passo pra lembrar que você não acabou com o fim do relacionamento.
+Você está começando.`,
   },
   {
     label: 'Sala Secreta',
@@ -27,7 +34,7 @@ Valor: Gratuito`
     image: '/assets/img/2.png',
     glowColor: 'bg-blue-500/20',
     ctaText: '🔒 Quero minha vaga na Sala Secreta',
-    hotmartLink: 'https://pay.hotmart.com/N101188112B', // Corrected Hotmart link
+    hotmartLink: 'https://pay.hotmart.com/N101188112B',
     description: `Você merece um espaço seguro para começar de novo.
 A Sala Secreta MQA é um encontro ao vivo, íntimo e transformador, feito pra você que está carregando dores silenciosas desde o fim do seu relacionamento.
 Talvez você esteja tentando ser forte por fora, mas por dentro ainda está perdida, cansada, presa ao que passou — ou ao que nunca foi.
@@ -46,7 +53,8 @@ Esse não é um evento somente para assistir, é pra sentir, refletir e sair dif
 ________________________________________
 Valor simbólico de entrada: R$47,60
 Você não está pagando por um conteúdo.
-Está investindo na primeira virada de chave da sua nova vida.`
+Está investindo na primeira virada de chave da sua nova vida.
+Vagas Limitadas. Em breve uma nova turma. Garanta a sua vaga.`
   },
   {
     label: 'Mentoria em Grupo',
@@ -73,96 +81,81 @@ Valor: R$ 2.997,80 ou 3x de R$ 999,80`
 ];
 
 const LivesMentorias = () => {
-  // State to manage form inputs (name, email, whatsapp, selectedOption)
   const [formData, setFormData] = useState({ name: '', email: '', whatsapp: '', selectedOption: '' });
-  // State to manage error messages
   const [error, setError] = useState(null);
-  // State to manage success messages
   const [success, setSuccess] = useState(null);
-  // State to manage selected card for modal display
   const [selectedCard, setSelectedCard] = useState(null);
-  // State to manage loading state during form submission
   const [isLoading, setIsLoading] = useState(false);
 
-  // Handle card click to show modal with option details
   const handleCardClick = (opt) => setSelectedCard(opt);
 
-  // Handle CTA button click in modal to select option and scroll to form
   const handleCTAClick = (value) => {
     setFormData((prev) => ({ ...prev, selectedOption: value }));
-    setSelectedCard(null); // Close modal
+    setSelectedCard(null);
     setTimeout(() => {
       document.getElementById('mentoria-form').scrollIntoView({ behavior: 'smooth' });
-    }, 300); // Smooth scroll to form after 300ms
+    }, 300);
   };
 
-  // Handle form input changes
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Validate required fields
     if (!formData.name || !formData.email || !formData.selectedOption) {
       setError('Preencha todos os campos obrigatórios.');
       return;
     }
 
-    setError(null); // Clear previous errors
-    setIsLoading(true); // Set loading state
+    setError(null);
+    setIsLoading(true);
     const selectedOpt = options.find(opt => opt.value === formData.selectedOption);
 
     try {
       if (selectedOpt.value === 'live') {
-        // For Live Gratuita: Submit form data and show success message
         await sendMentoria(formData);
         setSuccess('✅ Inscrição para a Live Gratuita enviada com sucesso! Verifique seu e-mail.');
-        setTimeout(() => setSuccess(null), 5000); // Clear success message after 5s
+        setTimeout(() => setSuccess(null), 5000);
       } else if (selectedOpt.hotmartLink) {
-        // For paid options (e.g., Sala Secreta): Submit form data and redirect to Hotmart
         await sendMentoria(formData);
         window.location.href = selectedOpt.hotmartLink;
       }
     } catch (error) {
-      // Handle API errors
       setError('Erro ao enviar os dados. Tente novamente.');
       console.error('API error:', error);
     } finally {
-      setIsLoading(false); // Clear loading state
+      setIsLoading(false);
     }
   };
 
-  // Dynamically set button text: "Enviar" for Live Gratuita, "Ir para Pagamento" for others
   const buttonText = formData.selectedOption === 'live' ? 'Enviar' : 'Ir para Pagamento';
 
   return (
     <section className="py-20 bg-gradient-to-r from-[#1e1e28] to-[#2e2e3e] text-white">
-      {/* Main container */}
       <div className="max-w-4xl mx-auto text-center px-4">
-        {/* Section title */}
         <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-red-500">
           Transforme Sua Vida Após o Divórcio
         </h2>
-        {/* Section subtitle */}
         <p className="text-lg md:text-xl text-gray-300 mb-8">
           Participe das Lives & Mentorias Exclusivas com Thaís Rosa
         </p>
 
-        {/* Cards grid for options */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
           {options.map((opt, i) => (
             <div
               key={i}
-              className={`relative rounded-2xl overflow-hidden shadow-xl cursor-pointer h-[28rem] flex items-end justify-center transition group`}
+              className={`relative rounded-2xl overflow-hidden shadow-xl cursor-pointer h-[28rem] flex items-end justify-center transition group border border-white/10`}
               onClick={() => handleCardClick(opt)}
             >
               <div className={`absolute inset-0 ${opt.glowColor} blur-2xl z-0`}></div>
-              <img src={opt.image} alt={opt.label} className="absolute top-0 left-0 w-full h-full object-cover z-10 group-hover:scale-105 transition" />
+              <img
+                src={opt.image}
+                alt={opt.label}
+                className="absolute top-0 left-0 w-full h-full object-cover z-10 group-hover:scale-105 transition rounded-xl sm:rounded-2xl object-center md:object-cover"
+              />
             </div>
           ))}
         </div>
 
-        {/* Info banner with calendar icon */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -173,7 +166,6 @@ const LivesMentorias = () => {
           <p>Escolha abaixo o tipo de encontro e receba o link após o pagamento.</p>
         </motion.div>
 
-        {/* Form for user input */}
         <form
           id="mentoria-form"
           onSubmit={handleSubmit}
@@ -217,7 +209,6 @@ const LivesMentorias = () => {
               <option key={i} value={opt.value}>{opt.label}</option>
             ))}
           </select>
-          {/* Submit button with dynamic text and loading state */}
           <button
             type="submit"
             disabled={isLoading}
@@ -225,14 +216,11 @@ const LivesMentorias = () => {
           >
             {isLoading ? 'Processando...' : buttonText}
           </button>
-          {/* Error message display */}
           {error && <p className="text-red-400 mt-4">{error}</p>}
-          {/* Success message display */}
           {success && <p className="text-green-400 mt-4">{success}</p>}
         </form>
       </div>
 
-      {/* Modal for displaying selected option details */}
       <AnimatePresence>
         {selectedCard && (
           <motion.div

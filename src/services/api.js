@@ -1,8 +1,7 @@
-// src/services/api.js
 import axios from 'axios';
 
-// 🔒 URL fixa da API Render
-const API_BASE_URL = 'https://api-mqa.onrender.com';
+// 🔒 URL da API — local ou produção (Render)
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api-mqa.onrender.com';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -11,9 +10,9 @@ const api = axios.create({
   },
 });
 
-// ==============================
-// FUNÇÕES DE ENVIO DE DADOS
-// ==============================
+/* ================================
+   FORMULÁRIOS PÚBLICOS
+================================= */
 
 // ✅ Envio do Ebook
 export const sendEbook = async (data) => {
@@ -51,11 +50,11 @@ export const sendContato = async (data) => {
   }
 };
 
-// ==============================
-// FUNÇÕES DE CONSULTA ADMIN
-// ==============================
+/* ================================
+   CONSULTAS ADMINISTRATIVAS
+================================= */
 
-// ✅ Buscar Leads do Ebook (rota corrigida)
+// ✅ Leads do E-book
 export const getEbookLeads = async () => {
   try {
     const response = await api.get('/ebook/leads');
@@ -66,13 +65,38 @@ export const getEbookLeads = async () => {
   }
 };
 
-// ✅ Buscar Leads de Mentoria
+// ✅ Leads da Mentoria
 export const getMentoriaLeads = async () => {
   try {
-    const response = await api.get('/admin/mentorialeads');
+    const response = await api.get('/api/mentorialeads');
+    if (!Array.isArray(response.data)) {
+      throw new Error('❌ Resposta da API não é um array');
+    }
     return response.data;
   } catch (error) {
-    console.error('❌ Erro ao buscar leads da Mentoria:', error.response || error);
+    console.error('❌ Erro ao buscar leads da Mentoria:', error.message || error);
+    throw error;
+  }
+};
+
+// ✅ Atualizar um lead de mentoria
+export const updateMentoriaLead = async (id, data) => {
+  try {
+    const response = await api.put(`/api/mentorialeads/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Erro ao atualizar lead da Mentoria:', error.response || error);
+    throw error;
+  }
+};
+
+// ✅ Atualizar status de prospecção
+export const toggleProspectStatus = async (id, isProspect) => {
+  try {
+    const response = await api.patch(`/api/mentorialeads/${id}/prospect`, { isProspect });
+    return response.data;
+  } catch (error) {
+    console.error('❌ Erro ao atualizar status de prospecção:', error.response || error);
     throw error;
   }
 };
@@ -88,7 +112,7 @@ export const getPagamentos = async () => {
   }
 };
 
-// ✅ Buscar Templates de Email
+// ✅ Templates de E-mail
 export const getEmailTemplates = async () => {
   try {
     const response = await api.get('/admin/email-templates');
