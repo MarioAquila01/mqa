@@ -12,6 +12,14 @@ const LeadTable = ({ leads, selectedLeads, setSelectedLeads, toggleProspect, set
     setSelectedLeads(updated);
   };
 
+  // 🔒 Código pronto para ativar link de WhatsApp no futuro
+  const toWaLink = (phone) => {
+    if (!phone) return null;
+    let digits = String(phone).replace(/\D+/g, '');
+    if (digits.length === 11) digits = '55' + digits; // prefixa DDI Brasil
+    return `https://wa.me/${digits}`;
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-white border-separate border-spacing-y-1">
@@ -20,6 +28,7 @@ const LeadTable = ({ leads, selectedLeads, setSelectedLeads, toggleProspect, set
             <th className="px-4 py-2"></th>
             <th className="px-4 py-2">Nome</th>
             <th className="px-4 py-2">E-mail</th>
+            <th className="px-4 py-2">WhatsApp</th>
             <th className="px-4 py-2">Etapa</th>
             <th className="px-4 py-2">Status</th>
             <th className="px-4 py-2">Data do Evento</th>
@@ -39,6 +48,29 @@ const LeadTable = ({ leads, selectedLeads, setSelectedLeads, toggleProspect, set
               </td>
               <td className="px-4 py-2">{lead.name}</td>
               <td className="px-4 py-2">{lead.email}</td>
+
+              {/* 🔹 Apenas mostra número agora */}
+              <td className="px-4 py-2">{lead.whatsapp || '-'}</td>
+
+              {/*
+              🔓 Para ativar link no futuro, troque a linha acima por:
+              <td className="px-4 py-2">
+                {lead.whatsapp ? (
+                  <a
+                    href={toWaLink(lead.whatsapp)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:no-underline"
+                    title={lead.whatsapp}
+                  >
+                    {lead.whatsapp}
+                  </a>
+                ) : (
+                  '-'
+                )}
+              </td>
+              */}
+
               <td className="px-4 py-2 capitalize">{lead.selectedOption || '-'}</td>
               <td className="px-4 py-2">{lead.isProspect ? 'Prospecção' : '-'}</td>
               <td className="px-4 py-2">{lead.eventDate || '-'}</td>

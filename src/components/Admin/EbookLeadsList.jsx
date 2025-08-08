@@ -1,15 +1,15 @@
+// src/components/Admin/EbookLeadsList.jsx
 import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getEbookLeads } from '../../services/api.js'; // Importa a função específica
+import { getEbookLeads } from '../../services/api.js';
+import api from '../../services/api.js'; // ✅ para PUT/PATCH/POST
 import BackToDashboardButton from '../Admin/BackToDashboardButton';
 
-// Constantes
 const LEADS_PER_PAGE = 10;
 const FILTER_OPTIONS = {
   prospectOptions: ['all', 'prospect', 'non-prospect'],
 };
 
-// Reducer para filtros
 const initialFilterState = {
   prospectFilter: 'all',
 };
@@ -34,34 +34,34 @@ const EbookLeadsList = () => {
 
   const navigate = useNavigate();
 
-  // Busca de leads
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      console.log('Prerendering detectado, pulando fetch.');
-      return;
-    }
+  // 🔒 pronto pra upgrade de link de WhatsApp
+  const toWaLink = (phone) => {
+    if (!phone) return null;
+    let digits = String(phone).replace(/\D+/g, '');
+    if (digits.length === 11) digits = '55' + digits; // DDI Brasil
+    return `https://wa.me/${digits}`;
+  };
 
+  useEffect(() => {
     const fetchLeads = async (retries = 3, delay = 1000) => {
       setLoading(true);
       setError(null);
       try {
-        console.log('📡 Tentando buscar leads da API: https://api-mqa.onrender.com/admin/ebookleads');
-        const data = await getEbookLeads(); // Usa a função do api.js
-        console.log('✅ Leads recebidos:', data);
+        console.log('📡 Buscando leads da API: /admin/ebook-leads');
+        const data = await getEbookLeads();
         setLeads(
           Array.isArray(data)
             ? data.map(lead => ({
                 ...lead,
                 isProspect: lead.isProspect || false,
                 indicationName: lead.indicationName || '',
-                indicationWhatsapp: lead.indicationWhatsapp || ''
+                indicationWhatsapp: lead.indicationWhatsapp || '',
               }))
             : []
         );
       } catch (error) {
         console.error('❌ Erro ao buscar leads do Ebook:', error.message, error.response?.data);
         if (retries > 0) {
-          console.log(`Tentando novamente em ${delay}ms... (${retries} tentativas restantes)`);
           await new Promise(resolve => setTimeout(resolve, delay));
           return fetchLeads(retries - 1, delay * 2);
         }
@@ -74,17 +74,17 @@ const EbookLeadsList = () => {
     fetchLeads();
   }, []);
 
-  // Exportação para CSV
   const exportCSV = () => {
     if (filteredLeads.length === 0) {
       setError('Nenhum lead para exportar.');
       return;
     }
     const csvContent = [
-      ['Nome', 'E-mail', 'E-book', 'Indicação Nome', 'Indicação WhatsApp', 'Prospectável'],
+      ['Nome', 'E-mail', 'WhatsApp', 'E-book', 'Indicação Nome', 'Indicação WhatsApp', 'Prospectável'],
       ...filteredLeads.map(lead => [
         lead.name || '',
         lead.email || '',
+        lead.whatsapp || '',
         lead.ebookOption || '',
         lead.indicationName || '',
         lead.indicationWhatsapp || '',
@@ -105,20 +105,15 @@ const EbookLeadsList = () => {
     URL.revokeObjectURL(url);
   };
 
-  // Seleção de leads
   const toggleLeadSelection = (leadId) => {
     setSelectedLeads(prev => {
       const newSelection = new Set(prev);
-      if (newSelection.has(leadId)) {
-        newSelection.delete(leadId);
-      } else {
-        newSelection.add(leadId);
-      }
+      if (newSelection.has(leadId)) newSelection.delete(leadId);
+      else newSelection.add(leadId);
       return newSelection;
     });
   };
 
-  // Edição de leads
   const handleEditLead = (lead) => {
     setEditingLead({ ...lead });
   };
@@ -129,10 +124,8 @@ const EbookLeadsList = () => {
       return;
     }
     try {
-      await api.put(`/admin/ebook-leads/${editingLead.id}`, editingLead);
-      setLeads(prev =>
-        prev.map(lead => (lead.id === editingLead.id ? { ...editingLead } : lead))
-      );
+      await api.put(`/admin/ebook-leads/${editingLead._id}`, editingLead); // ✅ _id
+      setLeads(prev => prev.map(lead => (lead._id === editingLead._id ? { ...editingLead } : lead)));
       setEditingLead(null);
       setError(null);
       alert('Lead atualizado com sucesso.');
@@ -142,15 +135,15 @@ const EbookLeadsList = () => {
     }
   };
 
-  // Marcar/desmarcar lead como prospectável
   const toggleProspect = async (leadId) => {
     try {
-      const updatedLead = leads.find(lead => lead.id === leadId);
+      const updatedLead = leads.find(lead => lead._id === leadId);
+      if (!updatedLead) return;
       const newProspectStatus = !updatedLead.isProspect;
       await api.patch(`/admin/ebook-leads/${leadId}`, { isProspect: newProspectStatus });
       setLeads(prev =>
         prev.map(lead =>
-          lead.id === leadId ? { ...lead, isProspect: newProspectStatus } : lead
+          lead._id === leadId ? { ...lead, isProspect: newProspectStatus } : lead
         )
       );
     } catch (error) {
@@ -159,9 +152,8 @@ const EbookLeadsList = () => {
     }
   };
 
-  // Disparo de e-mails
   const handleSendEmails = async () => {
-    const leadsToSend = leads.filter(lead => selectedLeads.has(lead.id));
+    const leadsToSend = leads.filter(lead => selectedLeads.has(lead._id)); // ✅ _id
     if (leadsToSend.length === 0) {
       setError('Nenhum lead selecionado para envio.');
       return;
@@ -178,21 +170,20 @@ const EbookLeadsList = () => {
     }
   };
 
-  // Filtragem de leads
   const filteredLeads = useMemo(() => {
     return leads.filter(lead => {
-      const matchProspect = filterState.prospectFilter === 'all' || lead.isProspect === (filterState.prospectFilter === 'prospect');
+      const matchProspect =
+        filterState.prospectFilter === 'all' ||
+        lead.isProspect === (filterState.prospectFilter === 'prospect');
       return matchProspect;
     });
   }, [leads, filterState]);
 
-  // Paginação
   const paginatedLeads = useMemo(() => {
     const start = (page - 1) * LEADS_PER_PAGE;
     return filteredLeads.slice(start, start + LEADS_PER_PAGE);
   }, [filteredLeads, page]);
 
-  // Renderização dos filtros
   const renderFilters = () => (
     <div className="flex flex-wrap gap-4 mb-6">
       <select
@@ -221,7 +212,6 @@ const EbookLeadsList = () => {
     </div>
   );
 
-  // Renderização do formulário de edição
   const renderEditForm = () => editingLead && (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-800 p-6 rounded-xl text-white max-w-md w-full">
@@ -242,29 +232,36 @@ const EbookLeadsList = () => {
         />
         <input
           type="text"
+          placeholder="WhatsApp"
+          value={editingLead.whatsapp || ''}
+          onChange={e => setEditingLead({ ...editingLead, whatsapp: e.target.value })}
+          className="w-full p-2 mb-4 rounded bg-gray-700 text-white text-base"
+        />
+        <input
+          type="text"
           placeholder="E-book"
-          value={editingLead.ebookOption}
+          value={editingLead.ebookOption || ''}
           onChange={e => setEditingLead({ ...editingLead, ebookOption: e.target.value })}
           className="w-full p-2 mb-4 rounded bg-gray-700 text-white text-base"
         />
         <input
           type="text"
           placeholder="Nome da Indicação"
-          value={editingLead.indicationName}
+          value={editingLead.indicationName || ''}
           onChange={e => setEditingLead({ ...editingLead, indicationName: e.target.value })}
           className="w-full p-2 mb-4 rounded bg-gray-700 text-white text-base"
         />
         <input
           type="text"
           placeholder="WhatsApp da Indicação"
-          value={editingLead.indicationWhatsapp}
+          value={editingLead.indicationWhatsapp || ''}
           onChange={e => setEditingLead({ ...editingLead, indicationWhatsapp: e.target.value })}
           className="w-full p-2 mb-4 rounded bg-gray-700 text-white text-base"
         />
         <div className="flex items-center mb-4">
           <input
             type="checkbox"
-            checked={editingLead.isProspect}
+            checked={!!editingLead.isProspect}
             onChange={() => setEditingLead({ ...editingLead, isProspect: !editingLead.isProspect })}
             className="mr-2"
           />
@@ -288,7 +285,6 @@ const EbookLeadsList = () => {
     </div>
   );
 
-  // Renderização da tabela de leads
   const renderLeadTable = () => (
     <div className="overflow-x-auto">
       <table className="min-w-full bg-[#1e1e28] border border-purple-500">
@@ -297,6 +293,7 @@ const EbookLeadsList = () => {
             <th className="p-3 border-b text-white text-base font-semibold">Selecionar</th>
             <th className="p-3 border-b text-white text-base font-semibold">Nome</th>
             <th className="p-3 border-b text-white text-base font-semibold">E-mail</th>
+            <th className="p-3 border-b text-white text-base font-semibold">WhatsApp</th> {/* ✅ novo */}
             <th className="p-3 border-b text-white text-base font-semibold">E-book</th>
             <th className="p-3 border-b text-white text-base font-semibold">Indicação Nome</th>
             <th className="p-3 border-b text-white text-base font-semibold">Indicação WhatsApp</th>
@@ -306,24 +303,45 @@ const EbookLeadsList = () => {
         </thead>
         <tbody>
           {paginatedLeads.map(lead => (
-            <tr key={lead.id} className="text-center border-b border-purple-500">
+            <tr key={lead._id} className="text-center border-b border-purple-500">
               <td className="p-3">
                 <input
                   type="checkbox"
-                  checked={selectedLeads.has(lead.id)}
-                  onChange={() => toggleLeadSelection(lead.id)}
+                  checked={selectedLeads.has(lead._id)}
+                  onChange={() => toggleLeadSelection(lead._id)}
                 />
               </td>
               <td className="p-3 text-white text-base">{lead.name}</td>
               <td className="p-3 text-white text-base">{lead.email}</td>
+
+              {/* 🔹 Apenas número agora */}
+              <td className="p-3 text-white text-base">{lead.whatsapp || '-'}</td>
+
+              {/*
+              🔓 Para ativar link no futuro, troque a célula acima por:
+              <td className="p-3 text-white text-base">
+                {lead.whatsapp ? (
+                  <a
+                    href={toWaLink(lead.whatsapp)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:no-underline"
+                    title={lead.whatsapp}
+                  >
+                    {lead.whatsapp}
+                  </a>
+                ) : ('-')}
+              </td>
+              */}
+
               <td className="p-3 text-white text-base">{lead.ebookOption || '-'}</td>
               <td className="p-3 text-white text-base">{lead.indicationName || '-'}</td>
               <td className="p-3 text-white text-base">{lead.indicationWhatsapp || '-'}</td>
               <td className="p-3">
                 <input
                   type="checkbox"
-                  checked={lead.isProspect}
-                  onChange={() => toggleProspect(lead.id)}
+                  checked={!!lead.isProspect}
+                  onChange={() => toggleProspect(lead._id)}
                 />
               </td>
               <td className="p-3">
