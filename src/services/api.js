@@ -1,3 +1,4 @@
+// src/services/api.js
 import axios from 'axios';
 
 // 🔒 URL da API — local ou produção (Render)
@@ -37,7 +38,6 @@ export const sendMentoria = async (data) => {
     throw error;
   }
 };
-
 
 // ✅ Envio do Contato
 export const sendContato = async (data) => {
@@ -120,6 +120,17 @@ export const getEmailTemplates = async () => {
     return response.data;
   } catch (error) {
     console.error('❌ Erro ao buscar templates de e-mail:', error.response || error);
+    throw error;
+  }
+};
+
+// ⚡ Enviar e-mail rápido (sem salvar no banco)
+export const sendEmailQuick = async ({ subject, body, recipients }) => {
+  try {
+    const response = await api.post('/admin/send-email-quick', { subject, body, recipients });
+    return response.data;
+  } catch (error) {
+    console.error('❌ Erro ao enviar e-mail rápido:', error.response || error);
     throw error;
   }
 };
