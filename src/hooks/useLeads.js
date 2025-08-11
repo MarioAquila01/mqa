@@ -1,93 +1,105 @@
 // src/hooks/useLeads.js
-import { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
+import {
+  getMentoriaLeads,
+  updateMentoriaLead,
+  toggleProspectStatus,
+  sendEmailQuick // 🔹 Novo import do services/api.js
+} from '../services/api';
 
 export const useLeads = () => {
   const [leads, setLeads] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'https://api-mqa.onrender.com';
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      console.log('Prerendering detectado, pulando fetch.');
+      return;
+    }
 
-  /**
-   * 🔹 Buscar leads de e-book ou mentoria
-   * @param {string} endpoint - Ex: '/admin/ebook-leads' ou '/admin/mentoria-leads'
-   */
-  const fetchLeads = useCallback(
-    async (endpoint = '/admin/ebook-leads', retries = 3, delay = 1000) => {
-      if (typeof window === 'undefined') return;
+    const fetchLeads = async (retries = 3, delay = 1000) => {
       setLoading(true);
       setError(null);
-
       try {
-        const response = await axios.get(`${apiUrl}${endpoint}`, { timeout: 3000 });
-        if (Array.isArray(response.data)) {
-          setLeads(response.data);
-        } else {
-          console.warn('⚠️ Resposta inesperada da API (leads não são array):', response.data);
-          setLeads([]);
+        const data = await getMentoriaLeads();
+
+        if (!Array.isArray(data)) {
+          throw new Error('Resposta da API não é um array');
         }
+
+        setLeads(data.map(lead => ({
+          ...lead,
+          isProspect: lead.isProspect || false,
+          eventDate: lead.eventDate || ''
+        })));
       } catch (err) {
-        console.error(`❌ Erro ao buscar leads (${retries} tentativas restantes):`, err.message);
+        console.error('Erro ao buscar leads:', err.message);
         if (retries > 0) {
-          setTimeout(() => fetchLeads(endpoint, retries - 1, delay), delay);
-        } else {
-          setError('Erro ao carregar leads.');
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return fetchLeads(retries - 1, delay * 2);
         }
+        setError(`Não foi possível carregar os leads da mentoria. Detalhes: ${err.message}`);
+        setLeads([]);
       } finally {
         setLoading(false);
       }
-    },
-    [apiUrl]
-  );
+    };
+
+    fetchLeads();
+  }, []);
+
+  const updateLead = async (lead) => {
+    try {
+      await updateMentoriaLead(lead._id, lead);
+      setLeads(prev => prev.map(l => (l._id === lead._id ? { ...lead } : l)));
+      alert('Lead atualizado com sucesso.');
+    } catch (err) {
+      console.error('Erro ao atualizar lead:', err.message);
+      setError('Erro ao atualizar lead.');
+    }
+  };
+
+  const toggleProspect = async (leadId) => {
+    try {
+      const updatedLead = leads.find(lead => lead._id === leadId);
+      if (!updatedLead) return;
+      const newProspectStatus = !updatedLead.isProspect;
+      await toggleProspectStatus(leadId, newProspectStatus);
+      setLeads(prev =>
+        prev.map(lead =>
+          lead._id === leadId ? { ...lead, isProspect: newProspectStatus } : lead
+        )
+      );
+    } catch (err) {
+      console.error('Erro ao atualizar status de prospecção:', err.message);
+      setError('Erro ao atualizar status de prospecção.');
+    }
+  };
 
   /**
-   * 🔹 Editar lead existente
+   * 🔹 Enviar e-mail rápido para lista de leads
+   * @param {Object} params
+   * @param {string} params.subject - Assunto do e-mail
+   * @param {string} params.body - Corpo HTML do e-mail
+   * @param {Array} params.recipients - Lista de e-mails
    */
-  const updateLead = useCallback(
-    async (id, data, endpoint = '/admin/update-lead') => {
-      if (!id) throw new Error('ID do lead é obrigatório para atualização.');
+  const sendQuickEmailToLeads = async ({ subject, body, recipients }) => {
+    try {
+      await sendEmailQuick({ subject, body, recipients });
+      alert('E-mail enviado com sucesso!');
+    } catch (err) {
+      console.error('Erro ao enviar e-mail rápido:', err.message);
+      setError('Erro ao enviar e-mail rápido.');
+    }
+  };
 
-      try {
-        const response = await axios.put(`${apiUrl}${endpoint}/${id}`, data);
-        setLeads((prevLeads) =>
-          prevLeads.map((lead) => (lead._id === id ? { ...lead, ...data } : lead))
-        );
-        return response.data;
-      } catch (err) {
-        console.error('❌ Erro ao atualizar lead:', err.response?.data || err.message);
-        throw err;
-      }
-    },
-    [apiUrl]
-  );
-
-  /**
-   * 🔹 Excluir lead
-   */
-  const deleteLead = useCallback(
-    async (id, endpoint = '/admin/delete-lead') => {
-      if (!id) throw new Error('ID do lead é obrigatório para exclusão.');
-
-      try {
-        await axios.delete(`${apiUrl}${endpoint}/${id}`);
-        setLeads((prevLeads) => prevLeads.filter((lead) => lead._id !== id));
-      } catch (err) {
-        console.error('❌ Erro ao excluir lead:', err.response?.data || err.message);
-        throw err;
-      }
-    },
-    [apiUrl]
-  );
-
-  return {
-    leads,
-    loading,
-    error,
-    fetchLeads,
-    updateLead,
-    deleteLead,
+  return { 
+    leads, 
+    loading, 
+    error, 
+    updateLead, 
+    toggleProspect, 
+    sendQuickEmailToLeads // 🔹 Novo método no retorno
   };
 };
-
-export default useLeads;
