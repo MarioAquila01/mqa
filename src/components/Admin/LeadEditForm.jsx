@@ -6,6 +6,7 @@ const LeadEditForm = ({ editingLead, setEditingLead, updateLead }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    whatsapp: '',
     etapa: '',
     status: '',
     eventDate: '',
@@ -16,7 +17,8 @@ const LeadEditForm = ({ editingLead, setEditingLead, updateLead }) => {
       setFormData({
         name: editingLead.name || '',
         email: editingLead.email || '',
-        etapa: editingLead.etapa || '',
+        whatsapp: editingLead.whatsapp || '',
+        etapa: editingLead.etapa || editingLead.selectedOption || '',
         status: editingLead.status || '',
         eventDate: editingLead.eventDate || '',
       });
@@ -54,6 +56,13 @@ const LeadEditForm = ({ editingLead, setEditingLead, updateLead }) => {
           value={formData.email}
           onChange={handleChange}
           placeholder="E-mail"
+          className="p-2 bg-gray-700 rounded text-white"
+        />
+        <input
+          name="whatsapp"
+          value={formData.whatsapp}
+          onChange={handleChange}
+          placeholder="WhatsApp"
           className="p-2 bg-gray-700 rounded text-white"
         />
         <input

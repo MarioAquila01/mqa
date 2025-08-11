@@ -1,14 +1,14 @@
+// src/hooks/useEmailTemplates.js
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-// Hook personalizado para templates de e-mail
 export const useEmailTemplates = () => {
   const [emailTemplates, setEmailTemplates] = useState([]);
   const [error, setError] = useState(null);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api-mqa.onrender.com';
 
-  // Buscar templates ao carregar
+  // 🔹 Buscar templates ao carregar
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -29,7 +29,7 @@ export const useEmailTemplates = () => {
     fetchTemplates();
   }, []);
 
-  // Atualizar um template
+  // 🔹 Atualizar template salvo no Mongo
   const updateEmailTemplate = async (type, data) => {
     try {
       const response = await axios.put(`${apiUrl}/admin/email-templates/${type}`, data);
@@ -45,17 +45,22 @@ export const useEmailTemplates = () => {
     }
   };
 
-  // Enviar e-mail em massa
-  const sendEmail = async ({ type, subject, body, recipients }) => {
+  /**
+   * 🔹 Enviar e-mail rápido (sem salvar no banco)
+   * @param {Object} params
+   * @param {string} params.subject - Assunto do e-mail
+   * @param {string} params.body - Corpo HTML do e-mail
+   * @param {string[]} params.recipients - Lista de e-mails dos destinatários
+   */
+  const sendEmailQuick = async ({ subject, body, recipients }) => {
     try {
-      await axios.post(`${apiUrl}/admin/send-email`, {
-        type,
+      await axios.post(`${apiUrl}/admin/send-email-quick`, {
         subject,
         body,
         recipients,
       });
     } catch (err) {
-      console.error('Erro ao enviar e-mail:', err);
+      console.error('Erro ao enviar e-mail rápido:', err);
       throw err;
     }
   };
@@ -64,6 +69,6 @@ export const useEmailTemplates = () => {
     emailTemplates,
     error,
     updateEmailTemplate,
-    sendEmail,
+    sendEmailQuick, // 🚀 Novo método para e-mails diretos
   };
 };

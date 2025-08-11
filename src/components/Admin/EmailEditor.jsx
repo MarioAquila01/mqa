@@ -1,3 +1,4 @@
+// src/components/Admin/EmailEditor.jsx
 import React, { useState, useEffect } from 'react';
 
 const EmailEditor = ({
@@ -5,7 +6,7 @@ const EmailEditor = ({
   setSelectedEmail,
   emailTemplates,
   updateEmailTemplate,
-  sendEmail,
+  sendEmailQuick, // 🔹 Novo envio rápido
   selectedLeads,
   leads,
 }) => {
@@ -19,14 +20,20 @@ const EmailEditor = ({
     }
   }, [selectedEmail]);
 
+  // 🔹 Salvar template no banco
   const handleUpdate = async () => {
     if (!selectedEmail) return;
     await updateEmailTemplate(selectedEmail.type, { subject, body });
     alert('Template atualizado com sucesso!');
   };
 
-  const handleSend = async () => {
-    if (!selectedEmail) return;
+  // 🔹 Enviar rápido (sem salvar no banco)
+  const handleSendQuick = async () => {
+    if (!subject.trim() || !body.trim()) {
+      alert('Preencha o assunto e o corpo do e-mail.');
+      return;
+    }
+
     if (selectedLeads.size === 0) {
       alert('Selecione ao menos um lead para enviar o e-mail.');
       return;
@@ -36,14 +43,17 @@ const EmailEditor = ({
       .filter((lead) => selectedLeads.has(lead._id))
       .map((lead) => lead.email);
 
-    await sendEmail({
-      type: selectedEmail.type,
-      subject,
-      body,
-      recipients: selectedEmails,
-    });
-
-    alert('E-mails enviados com sucesso!');
+    try {
+      await sendEmailQuick({
+        subject,
+        body,
+        recipients: selectedEmails,
+      });
+      alert('E-mails enviados com sucesso!');
+    } catch (error) {
+      alert('Erro ao enviar e-mails.');
+      console.error(error);
+    }
   };
 
   return (
@@ -60,7 +70,7 @@ const EmailEditor = ({
           }}
           value={selectedEmail?.type || ''}
         >
-          <option value="">Selecione um template</option>
+          <option value="">Nenhum template (e-mail rápido)</option>
           {emailTemplates.map((template) => (
             <option key={template.type} value={template.type}>
               {template.type}
@@ -91,14 +101,15 @@ const EmailEditor = ({
         <button
           onClick={handleUpdate}
           className="px-4 py-2 bg-blue-500 rounded hover:bg-blue-600"
+          disabled={!selectedEmail}
         >
           Salvar Template
         </button>
         <button
-          onClick={handleSend}
+          onClick={handleSendQuick}
           className="px-4 py-2 bg-green-500 rounded hover:bg-green-600"
         >
-          Enviar E-mail
+          Enviar E-mail Rápido
         </button>
       </div>
     </div>
