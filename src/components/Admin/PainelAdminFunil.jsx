@@ -1,3 +1,4 @@
+// src/components/Admin/PainelAdminFunil.jsx
 import React, { useState, useEffect } from 'react';
 import Filters from './Filters';
 import EmailEditor from './EmailEditor';
@@ -14,14 +15,14 @@ const PainelAdminFunil = () => {
   const [selectedEmail, setSelectedEmail] = useState(null);
 
   const { leads, loading, error, updateLead, toggleProspect } = useLeads();
-  const { emailTemplates, updateEmailTemplate, sendEmail } = useEmailTemplates();
+  const { emailTemplates, updateEmailTemplate, sendEmailQuick } = useEmailTemplates();
 
-  // 🧠 Proteção extra: seleciona o primeiro template ao carregar
+  // Seleciona o primeiro template ao carregar
   useEffect(() => {
     if (emailTemplates.length && !selectedEmail) {
       setSelectedEmail(emailTemplates[0]);
     }
-  }, [emailTemplates]);
+  }, [emailTemplates, selectedEmail]);
 
   return (
     <div className="p-6 bg-gray-900 min-h-screen">
@@ -41,7 +42,7 @@ const PainelAdminFunil = () => {
         setSelectedEmail={setSelectedEmail}
         emailTemplates={emailTemplates}
         updateEmailTemplate={updateEmailTemplate}
-        sendEmail={sendEmail}
+        sendEmailQuick={sendEmailQuick}
         selectedLeads={selectedLeads}
         leads={Array.isArray(leads) ? leads : []}
       />
