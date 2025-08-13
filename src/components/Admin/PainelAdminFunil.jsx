@@ -14,10 +14,12 @@ const PainelAdminFunil = () => {
   const [editingLead, setEditingLead] = useState(null);
   const [selectedEmail, setSelectedEmail] = useState(null);
 
-  const { leads, loading, error, updateLead, toggleProspect } = useLeads();
+  // novo estado de filtro de data
+  const [dateFilter, setDateFilter] = useState({ from: '', to: '' });
+
+  const { leads, loading, error, updateLead, toggleProspect } = useLeads(dateFilter);
   const { emailTemplates, updateEmailTemplate, sendEmailQuick } = useEmailTemplates();
 
-  // Seleciona o primeiro template ao carregar
   useEffect(() => {
     if (emailTemplates.length && !selectedEmail) {
       setSelectedEmail(emailTemplates[0]);
@@ -34,7 +36,8 @@ const PainelAdminFunil = () => {
 
       <Filters
         leads={Array.isArray(leads) ? leads : []}
-        setSelectedEmail={(email) => setSelectedEmail(email)}
+        setSelectedEmail={setSelectedEmail}
+        onDateFilterChange={setDateFilter} // <<<<<<<<<<<<<< conecta filtro de data
       />
 
       <EmailEditor

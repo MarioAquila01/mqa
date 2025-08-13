@@ -1,15 +1,18 @@
+// src/components/LivesMentorias.jsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCalendarCheck } from 'react-icons/fa';
 import { sendMentoria } from '../services/api';
 
-// Define options array with details for each mentorship/live option
+// Cards com glow exclusivo por item
 const options = [
   {
     label: 'Live Gratuita',
     value: 'live',
     image: '/assets/img/1.png',
     glowColor: 'bg-green-500/20',
+    glowFrom: 'from-emerald-400/40',
+    glowVia: 'via-green-500/20',
     ctaText: '👉 Quero participar da Live Gratuita',
     hotmartLink: '',
     description: `LIVE GRATUITA – O que sobrou de mim depois do divórcio?
@@ -21,7 +24,7 @@ ______________
 O que eu vou te contar nessa live:
 * Minha história, como a minha identidade se desmontou depois do divórcio, e como comecei a reconstruir, passo a passo.
 * O que eu aprendi sobre o luto que ninguém vê.
-* Quais  foram os primeiros gestos que realmente me ajudaram a voltar pra mim.
+* Quais foram os primeiros gestos que realmente me ajudaram a voltar pra mim.
 * E por que hoje eu consigo olhar pra tudo isso sem vergonha, sem culpa e com uma força que antes eu nem sabia que existia.
 
 Duração aproximada: 1h30
@@ -33,6 +36,8 @@ Você está começando.`,
     value: 'sala',
     image: '/assets/img/2.png',
     glowColor: 'bg-blue-500/20',
+    glowFrom: 'from-sky-400/40',
+    glowVia: 'via-blue-500/20',
     ctaText: '🔒 Quero minha vaga na Sala Secreta',
     hotmartLink: 'https://pay.hotmart.com/N101188112B',
     description: `Você merece um espaço seguro para começar de novo.
@@ -61,6 +66,8 @@ Vagas Limitadas. Em breve uma nova turma. Garanta a sua vaga.`
     value: 'grupo',
     image: '/assets/img/3.png',
     glowColor: 'bg-yellow-500/20',
+    glowFrom: 'from-amber-400/40',
+    glowVia: 'via-yellow-500/20',
     ctaText: '✍️ Quero descobrir meu arquétipo',
     hotmartLink: 'https://pay.hotmart.com/GRUPO-LINK',
     description: `Mentoria em Grupo MQA: "Os Arquétipos do Divórcio"
@@ -72,6 +79,8 @@ Valor: R$ 297,80 ou 3x de R$ 99,80`
     value: 'individual',
     image: '/assets/img/4.png',
     glowColor: 'bg-red-500/20',
+    glowFrom: 'from-rose-400/40',
+    glowVia: 'via-red-500/20',
     ctaText: '🗝️ Quero um plano só meu',
     hotmartLink: 'https://pay.hotmart.com/INDIVIDUAL-LINK',
     description: `Mentoria 1:1 com Thaís Rosa – Uma jornada de reconstrução feita só para você.
@@ -93,7 +102,7 @@ const LivesMentorias = () => {
     setFormData((prev) => ({ ...prev, selectedOption: value }));
     setSelectedCard(null);
     setTimeout(() => {
-      document.getElementById('mentoria-form').scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('mentoria-form')?.scrollIntoView({ behavior: 'smooth' });
     }, 300);
   };
 
@@ -139,19 +148,37 @@ const LivesMentorias = () => {
           Participe das Lives & Mentorias Exclusivas com Thaís Rosa
         </p>
 
+        {/* GRID DE CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
           {options.map((opt, i) => (
             <div
               key={i}
-              className={`relative rounded-2xl overflow-hidden shadow-xl cursor-pointer h-[28rem] flex items-end justify-center transition group border border-white/10`}
+              className="relative group rounded-2xl overflow-hidden border border-white/10 cursor-pointer"
               onClick={() => handleCardClick(opt)}
             >
-              <div className={`absolute inset-0 ${opt.glowColor} blur-2xl z-0`}></div>
-              <img
-                src={opt.image}
-                alt={opt.label}
-                className="absolute top-0 left-0 w-full h-full object-cover z-10 group-hover:scale-105 transition rounded-xl sm:rounded-2xl object-center md:object-cover"
+              {/* Glow base */}
+              <div className={`absolute inset-0 ${opt.glowColor} blur-2xl z-0`} />
+
+              {/* Glow gradiente personalizado por card */}
+              <div
+                className={`absolute -inset-10 bg-gradient-to-br ${opt.glowFrom} ${opt.glowVia} to-transparent blur-3xl opacity-70 z-0`}
+                aria-hidden
               />
+
+              {/* Wrapper com altura responsiva — maior no mobile */}
+              <div className="relative z-10 w-full h-[22rem] xs:h-[24rem] sm:h-[26rem] md:h-[28rem]">
+                <img
+                    src={opt.image}
+                    alt={opt.label}
+                    className="
+                     absolute inset-0 w-full h-full
+                      object-contain sm:object-cover object-center
+                     scale-100 sm:scale-100
+                      transition-transform duration-500
+                      sm:group-hover:scale-105
+                    "
+                  />
+              </div>
             </div>
           ))}
         </div>
@@ -166,6 +193,7 @@ const LivesMentorias = () => {
           <p>Escolha abaixo o tipo de encontro e receba o link após o pagamento.</p>
         </motion.div>
 
+        {/* FORM */}
         <form
           id="mentoria-form"
           onSubmit={handleSubmit}
@@ -221,6 +249,7 @@ const LivesMentorias = () => {
         </form>
       </div>
 
+      {/* MODAL */}
       <AnimatePresence>
         {selectedCard && (
           <motion.div

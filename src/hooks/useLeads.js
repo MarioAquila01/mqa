@@ -4,102 +4,99 @@ import {
   getMentoriaLeads,
   updateMentoriaLead,
   toggleProspectStatus,
-  sendEmailQuick // 🔹 Novo import do services/api.js
+  sendEmailQuick
 } from '../services/api';
 
-export const useLeads = () => {
+// Marca "Novo" se o lead foi criado nas últimas N horas (padrão 48h)
+const isWithinHours = (dateString, hours = 48) => {
+  if (!dateString) return false;
+  const d = new Date(dateString);
+  const now = new Date();
+  return now - d <= hours * 60 * 60 * 1000;
+};
+
+export const useLeads = (filters = {}) => {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError]   = useState(null);
+
+  const fetchLeads = async (retries = 2, delay = 800) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // monta query ?from=YYYY-MM-DD&to=YYYY-MM-DD (se backend aceitar)
+      const params = new URLSearchParams();
+      if (filters.from) params.set('from', filters.from);
+      if (filters.to)   params.set('to',   filters.to);
+
+      const data = await getMentoriaLeads(params.toString() ? `?${params}` : '');
+
+      if (!Array.isArray(data)) {
+        throw new Error('Resposta da API não é um array');
+      }
+
+      const normalized = data
+        .map(lead => ({
+          ...lead,
+          isProspect: lead.isProspect || lead.prospect || false,
+          eventDate:  lead.eventDate  || '',
+          createdAt:  lead.createdAt  || lead.created_at || null,
+        }))
+        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+        .map(l => ({ ...l, isNew: isWithinHours(l.createdAt, 48) }));
+
+      setLeads(normalized);
+    } catch (err) {
+      console.error('Erro ao buscar leads:', err);
+      if (retries > 0) {
+        await new Promise(r => setTimeout(r, delay));
+        return fetchLeads(retries - 1, delay * 2);
+      }
+      setError(`Não foi possível carregar os leads. Detalhes: ${err.message}`);
+      setLeads([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      console.log('Prerendering detectado, pulando fetch.');
-      return;
-    }
-
-    const fetchLeads = async (retries = 3, delay = 1000) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await getMentoriaLeads();
-
-        if (!Array.isArray(data)) {
-          throw new Error('Resposta da API não é um array');
-        }
-
-        setLeads(data.map(lead => ({
-          ...lead,
-          isProspect: lead.isProspect || false,
-          eventDate: lead.eventDate || ''
-        })));
-      } catch (err) {
-        console.error('Erro ao buscar leads:', err.message);
-        if (retries > 0) {
-          await new Promise(resolve => setTimeout(resolve, delay));
-          return fetchLeads(retries - 1, delay * 2);
-        }
-        setError(`Não foi possível carregar os leads da mentoria. Detalhes: ${err.message}`);
-        setLeads([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchLeads();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.from, filters.to]);
 
   const updateLead = async (lead) => {
     try {
       await updateMentoriaLead(lead._id, lead);
-      setLeads(prev => prev.map(l => (l._id === lead._id ? { ...lead } : l)));
-      alert('Lead atualizado com sucesso.');
+      setLeads(prev => prev.map(l => (l._id === lead._id ? { ...l, ...lead } : l)));
+      // opcional: toast/alert
     } catch (err) {
-      console.error('Erro ao atualizar lead:', err.message);
+      console.error('Erro ao atualizar lead:', err);
       setError('Erro ao atualizar lead.');
     }
   };
 
   const toggleProspect = async (leadId) => {
     try {
-      const updatedLead = leads.find(lead => lead._id === leadId);
-      if (!updatedLead) return;
-      const newProspectStatus = !updatedLead.isProspect;
-      await toggleProspectStatus(leadId, newProspectStatus);
-      setLeads(prev =>
-        prev.map(lead =>
-          lead._id === leadId ? { ...lead, isProspect: newProspectStatus } : lead
-        )
-      );
+      const current = leads.find(l => l._id === leadId);
+      if (!current) return;
+      const next = !current.isProspect;
+      await toggleProspectStatus(leadId, next);
+      setLeads(prev => prev.map(l => (l._id === leadId ? { ...l, isProspect: next } : l)));
     } catch (err) {
-      console.error('Erro ao atualizar status de prospecção:', err.message);
-      setError('Erro ao atualizar status de prospecção.');
+      console.error('Erro ao alternar prospect:', err);
+      setError('Erro ao alternar prospect.');
     }
   };
 
-  /**
-   * 🔹 Enviar e-mail rápido para lista de leads
-   * @param {Object} params
-   * @param {string} params.subject - Assunto do e-mail
-   * @param {string} params.body - Corpo HTML do e-mail
-   * @param {Array} params.recipients - Lista de e-mails
-   */
   const sendQuickEmailToLeads = async ({ subject, body, recipients }) => {
     try {
       await sendEmailQuick({ subject, body, recipients });
-      alert('E-mail enviado com sucesso!');
+      // opcional: toast/alert
     } catch (err) {
-      console.error('Erro ao enviar e-mail rápido:', err.message);
+      console.error('Erro ao enviar e-mail rápido:', err);
       setError('Erro ao enviar e-mail rápido.');
     }
   };
 
-  return { 
-    leads, 
-    loading, 
-    error, 
-    updateLead, 
-    toggleProspect, 
-    sendQuickEmailToLeads // 🔹 Novo método no retorno
-  };
+  return { leads, loading, error, updateLead, toggleProspect, sendQuickEmailToLeads };
 };
